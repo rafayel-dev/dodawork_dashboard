@@ -1,12 +1,14 @@
-export const url = "https://belasea.sgp1.digitaloceanspaces.com";
+export const baseUrl = "http://10.10.20.52:6002";
+export const imageBaseUrl = "http://10.10.20.52:6002";
+
 export const imageUrl = (image) => {
   return image
     ? image?.startsWith("http")
       ? image
       : image?.startsWith("/")
-      ? `${url}${image}`
-      : `${url}/${image}`
-    : "https://placehold.co/400";
+      ? `${imageBaseUrl}${image}`
+      : `${imageBaseUrl}/${image}`
+    : "https://placehold.co/178x200";
 };
 
 export const convertDate = (date) => {

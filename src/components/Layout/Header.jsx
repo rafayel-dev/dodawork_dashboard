@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import Notifications from "../Notifications/Notifications";
-import { FiChevronDown, FiLogOut, FiSettings, FiUser } from "react-icons/fi";
+import { FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";

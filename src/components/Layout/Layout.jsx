@@ -1,21 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import ProfileSidebar from "../ProfileSidebar/ProfileSidebar";
 import MainSidebar from "./MainSidebar";
 import Header from "./Header";
+import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis";
+import { imageUrl } from "../../utils/optimizationFunction";
 
 const Layout = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
-
+  const { data: superAdminProfile, isLoading: superAdminProfileLoading } = useGetSuperAdminProfileQuery()
   const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    role: "Administrator",
+    name: "",
+    email: "",
+    avatar: "",
+    role: "",
   });
+  useEffect(() => {
+    if (superAdminProfile && !superAdminProfileLoading) {
+      setUser({
+        name: superAdminProfile?.data?.name || "",
+        email: superAdminProfile?.data?.email || "",
+        avatar: imageUrl(superAdminProfile?.data?.profile_image) || "",
+        role: superAdminProfile?.data?.role || "",
+      });
+    }
+  }, [superAdminProfile, superAdminProfileLoading]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -38,13 +48,9 @@ const Layout = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // if (location.pathname === "/test") {
-  //   return <Outlet />;
-  // }
-
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Mobile sidebar backdrop */}
+
       {isSidebarOpen && (
         <div
           className="fixed inset-0  bg-opacity-50 lg:hidden z-20"
@@ -52,26 +58,26 @@ const Layout = () => {
         ></div>
       )}
 
-      {/* Sidebar */}
+
       <MainSidebar
         setIsSidebarOpen={setIsSidebarOpen}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
       />
 
-      {/* Main content */}
+
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top navbar */}
+
         <Header user={user} toggleSidebar={toggleSidebar} />
 
-        {/* Page content */}
+
         <main className="flex-1 bg-gray-100 overflow-y-auto p-4 lg:ml-64">
           <div className="mx-auto w-full">
             <Outlet />
           </div>
         </main>
       </div>
-      {/* Profile Sidebar for Mobile */}
+
       <ProfileSidebar
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}

@@ -16,11 +16,15 @@ import Test from "../components/common/Test";
 import ChatLayout from "../pages/chat/ChatLayout";
 import AdminPage from "../pages/admin/AdminPage";
 import SignUpUserRequest from "../pages/sign-up-user-request/SignUpUserRequest";
+import AuthChecker from "../security/AuthChecker";
 
 export const DashboardRoutes = {
     path: "/",
     errorElement: <NotFound />,
-    element: <Layout />,
+    element:
+        <AuthChecker>
+            <Layout />
+        </AuthChecker>,
     children: [
         {
             index: true,

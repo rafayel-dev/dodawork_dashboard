@@ -1,13 +1,44 @@
-import React from 'react';
-import { Button, Form, Input, Flex, Card, Typography, Divider, Checkbox, message } from 'antd';
-import { Link } from 'react-router-dom';
-import brandIcon from "../../../public/brandIcon.svg"
+import React, { useEffect } from 'react';
+import { Button, Form, Input, Flex, Card, Typography, Divider } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import brandIcon from "../../../src/assets/brandIcon.svg"
+import { useLoginMutation } from '../../RTK/services/auth/authApi';
+import toast from 'react-hot-toast';
 const { Title, Paragraph } = Typography;
 const Login = () => {
-  const onFinish = values => {
-    console.log('Received values of form: ', values);
-    window.location.href = "/";
-    message.success("Login successful");
+  const [login, { isLoading }] = useLoginMutation()
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
+  // only for development
+  useEffect(() => {
+    form.setFieldsValue({
+      email: "kazimdairfishtiaque@gmail.com",
+      password: "123456",
+    })
+  }, [])
+  const onFinish = async (values) => {
+    try {
+      if (!values?.email || !values?.password) {
+        throw new Error("Please fill all the fields")
+      }
+      await login(values).unwrap().then(async (res) => {
+        if (res?.success) {
+          const token = localStorage.getItem("accessToken")
+          if (token) {
+            localStorage.removeItem("accessToken")
+          }
+          localStorage.setItem("accessToken", res?.data?.accessToken)
+          if (token) {
+            toast.success(res?.message || "Login successful")
+            await navigate("/")
+          }
+        } else {
+          throw new Error(res?.message || "Something went wrong")
+        }
+      })
+    } catch (error) {
+      toast.error(error?.data?.message || error?.message || "Something went wrong")
+    }
   };
   return (
     <div className='w-full h-dvh flex max-w-screen-md mx-auto items-center justify-center'>
@@ -21,7 +52,7 @@ const Login = () => {
           layout="vertical"
           requiredMark={false}
           name="login"
-          initialValues={{ remember: true }}
+          form={form}
           style={{ width: 450 }}
           onFinish={onFinish}
         >
@@ -41,15 +72,15 @@ const Login = () => {
           </Form.Item>
           <Form.Item>
             <Flex justify="space-between" align="center">
-              <Form.Item name="remember" valuePropName="checked" noStyle>
+              {/* <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Remember me</Checkbox>
-              </Form.Item>
+              </Form.Item> */}
               <Link to="/forgot-password" type='Link' className='hover:!underline'>Forgot password</Link>
             </Flex>
           </Form.Item>
 
           <Form.Item>
-            <Button size='large' style={{ backgroundColor: "var(--secondary-color)", color: "white" }} block type="primary" htmlType="submit">
+            <Button loading={isLoading} disabled={isLoading} size='large' style={{ backgroundColor: "var(--secondary-color)", color: "white" }} block type="primary" htmlType="submit">
               Log in
             </Button>
           </Form.Item>
