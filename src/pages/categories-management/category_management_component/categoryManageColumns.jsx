@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Popconfirm, Space } from "antd";
+import { Button, Popconfirm, Space, Tooltip } from "antd";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import UserImage from "../../../components/user/UserImage";
 import { GrLinkNext } from "react-icons/gr";
@@ -10,13 +10,13 @@ export const categoryManageColumns = (onEdit, onDelete, onNavigate) => [
     dataIndex: "name",
     key: "name",
     render: (text, record) => (
-      <UserImage user={{ name: text, avatar: record.avatar }} />
+      <UserImage user={{ name: text, avatar: record.icon }} />
     ),
   },
   {
     title: "Sub Category",
-    dataIndex: "sub_category",
-    key: "sub_category",
+    dataIndex: "subcategoryCount",
+    key: "subcategoryCount",
   },
   {
     title: "Action",
@@ -24,15 +24,21 @@ export const categoryManageColumns = (onEdit, onDelete, onNavigate) => [
     key: "action",
     render: (_, record) => (
       <Space>
-        <Button onClick={() => onEdit(record)} shape="circle" icon={<FaEdit />} />
-        <Popconfirm
-          title={`Are you sure to delete ${record.name}?`}
-          placement="topRight"
-          okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }}
-          onConfirm={() => onDelete(record)}>
-          <Button shape="circle" icon={<FaTrash />} />
-        </Popconfirm>
-        <Button onClick={() => onNavigate(record._id)} shape="circle" icon={<GrLinkNext />} />
+        <Tooltip title="Edit">
+          <Button onClick={() => onEdit(record)} shape="circle" icon={<FaEdit />} />
+        </Tooltip>
+        <Tooltip title={record.subcategoryCount > 0 ? "Cannot delete" : "Delete"}>
+          <Popconfirm
+            title={`Are you sure to delete ${record.name}?`}
+            placement="topRight"
+            okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }}
+            onConfirm={() => onDelete(record)}>
+            <Button disabled={record.subcategoryCount > 0} shape="circle" icon={<FaTrash />} />
+          </Popconfirm>
+        </Tooltip>
+        <Tooltip title="View Sub Categories">
+          <Button onClick={() => onNavigate(record._id)} shape="circle" icon={<GrLinkNext />} />
+        </Tooltip>
       </Space>
     ),
   },

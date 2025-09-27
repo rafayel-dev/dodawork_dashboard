@@ -3,10 +3,12 @@ import { baseApi } from "../../baseApi";
 const subCategoriseApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllSubCategories: builder.query({
-      query: () => ({
-        url: `/category/get-all-subcategories`,
+      query: ({ categoryId }) => ({
+        url: `/category/get-by-id`,
         method: "GET",
+        params: { categoryId },
       }),
+      providesTags: ["SubCategory"],
     }),
     createSubCategory: builder.mutation({
       query: (params) => ({
@@ -14,6 +16,7 @@ const subCategoriseApi = baseApi.injectEndpoints({
         method: "POST",
         body: params,
       }),
+      invalidatesTags: ["SubCategory"],
     }),
     updateSubCategory: builder.mutation({
       query: (params) => ({
@@ -21,6 +24,7 @@ const subCategoriseApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: params,
       }),
+      invalidatesTags: ["SubCategory"],
     }),
     deleteSubCategory: builder.mutation({
       query: (params) => ({
@@ -28,6 +32,7 @@ const subCategoriseApi = baseApi.injectEndpoints({
         method: "DELETE",
         body: params,
       }),
+      invalidatesTags: ["SubCategory"],
     }),
   }),
 });

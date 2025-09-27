@@ -1,83 +1,110 @@
 import React, { useCallback, useState } from "react";
-import { Table } from "antd";
+import { Form, Table } from "antd";
 import { categoryManageColumns } from "./categoryManageColumns";
 import CustomButton from "../../../components/common/CustomButton";
 import CategoryForm from "./CategoryForm";
 import { useNavigate } from "react-router-dom";
+import {
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetAllCategoriesQuery,
+  useUpdateCategoryMutation,
+} from "../../../RTK/services/dashboard/categoris-subCategoriseApis/categorisApis";
+import toast from "react-hot-toast";
+
 function CategoryManageTable() {
-  const navigate = useNavigate()
-  const [addCategoryModalVisible, setAddCategoryModalVisible] = useState(false)
-  const [updateCategoryModalVisible, setUpdateCategoryModalVisible] = useState(false)
-  const [record, setRecord] = useState(null)
-  const data = [
-    {
-      _id: "1",
-      request_id: "#121211",
-      key: "1",
-      name: "category",
-      sub_category: 2,
-      status: "Pending",
-      avatar: "https://avatar.iran.liara.run/public/13",
-    },
-    {
-      _id: "2",
-      request_id: "#121212",
-      key: "2",
-      name: "category2",
-      sub_category: 2,
-      status: "Rejected",
-      avatar: "https://avatar.iran.liara.run/public/20",
-    },
-  ];
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [record, setRecord] = useState(null);
+
+  const { data: categories, isLoading, isFetching } = useGetAllCategoriesQuery();
+  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
 
   const handleAddCategory = useCallback(() => {
-    setAddCategoryModalVisible(true)
+    setIsUpdate(false);
+    setRecord(null);
+    setModalVisible(true);
   }, []);
 
   const handleEditCategory = useCallback((record) => {
-    setUpdateCategoryModalVisible(true)
-    setRecord(record)
+    setIsUpdate(true);
+    setRecord(record);
+    setModalVisible(true);
   }, []);
 
-  const handleDeleteCategory = useCallback((record) => {
-    console.log("Delete Category", record);
-  }, []);
+  const handleDeleteCategory = useCallback(async (record) => {
+    try {
+      const res = await deleteCategory(record._id).unwrap();
+      if (res?.success) toast.success(res.message || "Category deleted successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong");
+    }
+  }, [deleteCategory]);
 
   const handleNavigate = useCallback((id) => {
-    console.log("Navigate", id);
-    navigate(`/categories-management/sub-category/${id}`);
-  }, []);
+    navigate(`/categories-management/sub-category/${id}`, { state: { id } });
+  }, [navigate]);
 
-  const handleSubmitCategory = useCallback((values) => {
-    console.log("Submit Category", values);
-  }, []);
+  const handleSubmit = useCallback(
+    async (values) => {
+      try {
+        const formData = new FormData();
+        formData.append("name", values.name);
+        if (values?.avatar?.fileList?.[0]?.originFileObj) {
+          formData.append("icon", values.avatar.fileList[0].originFileObj);
+        }
+
+        let res;
+        if (isUpdate && record?._id) {
+          formData.append("categoryId", record._id);
+          res = await updateCategory(formData).unwrap();
+        } else {
+          res = await createCategory(formData).unwrap();
+        }
+
+        if (res?.success) {
+          toast.success(res.message || `Category ${isUpdate ? "updated" : "created"} successfully`);
+          setModalVisible(false);
+          form.resetFields();
+        }
+      } catch (error) {
+        toast.error(error?.data?.message || "Something went wrong");
+      }
+    },
+    [createCategory, updateCategory, isUpdate, record, form]
+  );
 
   return (
     <div>
       <CustomButton onClick={handleAddCategory} title="Add Category" icon="plus" />
+
       <Table
+        loading={isLoading || isFetching}
         columns={categoryManageColumns(handleEditCategory, handleDeleteCategory, handleNavigate)}
-        dataSource={data}
+        dataSource={categories?.data?.categories || []}
         pagination={false}
         scroll={{ x: "max-content" }}
         size="large"
         bordered
+        rowKey="_id"
       />
+
       <CategoryForm
-        open={addCategoryModalVisible}
-        hide={setAddCategoryModalVisible}
-        onFinish={handleSubmitCategory}
-        title="Add Category"
-      />
-      <CategoryForm
+        form={form}
+        open={modalVisible}
+        hide={setModalVisible}
+        onFinish={handleSubmit}
+        title={isUpdate ? "Update Category" : "Add Category"}
         record={record}
-        open={updateCategoryModalVisible}
-        hide={setUpdateCategoryModalVisible}
-        onFinish={handleSubmitCategory}
-        title="Update Category"
+        loading={isUpdate ? isUpdating : isCreating}
       />
     </div>
   );
 }
 
-export default CategoryManageTable;
+export default CategoryManageTable

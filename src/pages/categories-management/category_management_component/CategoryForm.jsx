@@ -1,47 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Modal, Button, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { imageUrl } from "../../../utils/optimizationFunction";
 
-function CategoryForm({ open, hide, title, onFinish, record }) {
-    const [form] = Form.useForm();
+function CategoryForm({ open, hide, title, onFinish, record, loading, form }) {
     const [fileList, setFileList] = useState([]);
 
     useEffect(() => {
         if (record) {
-            form.setFieldsValue(record);
-            if (record.avatar) {
-                setFileList([{
-                    uid: '-1',
-                    name: record.name,
-                    status: 'done',
-                    url: record.avatar,
-                }]);
+            form.setFieldsValue({ name: record.name });
+            if (record?.icon) {
+                setFileList([
+                    {
+                        uid: "-1",
+                        name: record.name,
+                        status: "done",
+                        url: imageUrl(record.icon),
+                    },
+                ]);
             }
         } else {
+            form.resetFields();
             setFileList([]);
         }
     }, [record, form]);
 
-    const handleUploadChange = ({ fileList }) => {
-        setFileList(fileList);
-    };
+    const handleUploadChange = ({ fileList }) => setFileList(fileList);
 
     return (
         <Modal
             title={title}
             open={open}
-            onOk={() => hide()}
-            onCancel={() => hide()}
+            onCancel={() => hide(false)}
             footer={null}
             centered
+            destroyOnClose
         >
-            <Form
-                layout="vertical"
-                onFinish={onFinish}
-                requiredMark={false}
-                form={form}
-            >
-                <Form.Item name="avatar">
+            <Form layout="vertical" onFinish={onFinish} requiredMark={false} form={form}>
+                <Form.Item name="avatar" label="Category Icon">
                     <Upload
                         name="avatar"
                         listType="picture"
@@ -54,6 +50,7 @@ function CategoryForm({ open, hide, title, onFinish, record }) {
                         <Button icon={<UploadOutlined />}>Upload</Button>
                     </Upload>
                 </Form.Item>
+
                 <Form.Item
                     name="name"
                     label="Category Name"
@@ -61,12 +58,15 @@ function CategoryForm({ open, hide, title, onFinish, record }) {
                 >
                     <Input />
                 </Form.Item>
+
                 <Form.Item>
                     <Button
                         style={{ backgroundColor: "var(--primary-color)", color: "white" }}
                         htmlType="submit"
+                        loading={loading}
+                        block
                     >
-                        Submit
+                        {title}
                     </Button>
                 </Form.Item>
             </Form>

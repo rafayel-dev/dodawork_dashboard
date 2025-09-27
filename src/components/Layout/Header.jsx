@@ -3,21 +3,22 @@ import Notifications from "../Notifications/Notifications";
 import { FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+
+export const handleLogout = () => {
+  localStorage.removeItem("accessToken");
+  if (window !== undefined) {
+    window.location.reload();
+  }
+};
 
 function Header({ user, toggleSidebar }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
-  const navigate = useNavigate();
 
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
   };
 
-  const handleLogout = () => {
-    console.log("User logged out");
-    navigate("/login");
-  };
   return (
     <div>
       <header className="flex h-20 items-center bg-[var(--primary-color)] shadow-sm lg:ml-64">

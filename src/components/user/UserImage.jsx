@@ -1,13 +1,14 @@
 import React from "react";
 import cn from "../../lib/cn";
+import { imageUrl } from "../../utils/optimizationFunction";
 
 function UserImage({ user, className }) {
   return (
     <div className="flex items-center gap-2">
       <img
-        src={user?.avatar}
+        src={imageUrl(user?.avatar)}
         alt={user?.name}
-        className={cn("w-10 h-10 rounded-full", className)}
+        className={cn("w-10 border border-gray-300 object-contain h-10 rounded-full", className)}
       />
       <div className="flex flex-col">
         <h1>{user?.name}</h1>

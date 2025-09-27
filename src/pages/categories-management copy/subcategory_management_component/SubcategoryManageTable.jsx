@@ -1,74 +1,116 @@
 import React, { useCallback, useState } from "react";
-import { Table } from "antd";
+import { Form, Table } from "antd";
 import { subCategoryManageColumns } from "./subCategoryManageColumns";
 import CustomButton from "../../../components/common/CustomButton";
-import CategoryForm from "../../categories-management/category_management_component/CategoryForm";
 import BackButton from "../../../components/common/BackButton";
+import {
+  useCreateSubCategoryMutation,
+  useGetAllSubCategoriesQuery,
+  useUpdateSubCategoryMutation,
+  useDeleteSubCategoryMutation,
+} from "../../../RTK/services/dashboard/categoris-subCategoriseApis/subCategoriseApis";
+import { useLocation } from "react-router-dom";
+import SubCategoryForm from "./SubCategoryForm";
+import toast from "react-hot-toast";
 
 function SubcategoryManageTable() {
-  const [addCategoryModalVisible, setAddCategoryModalVisible] = useState(false)
-  const [updateCategoryModalVisible, setUpdateCategoryModalVisible] = useState(false)
-  const [record, setRecord] = useState(null)
-  const data = [
-    {
-      _id: "1",
-      request_id: "#121211",
-      key: "1",
-      name: "sub category",
-      status: "Pending",
-      avatar: "https://avatar.iran.liara.run/public/13",
+  const [form] = Form.useForm();
+  const location = useLocation().state;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [mode, setMode] = useState("create"); // "create" | "update"
+  const [record, setRecord] = useState(null);
+
+  const { data: subCategories, isLoading, isFetching } = useGetAllSubCategoriesQuery(
+    { categoryId: location?.id },
+    { skip: !location?.id }
+  );
+
+  const [createSubCategory, { isLoading: isCreating }] = useCreateSubCategoryMutation();
+  const [updateSubCategory, { isLoading: isUpdating }] = useUpdateSubCategoryMutation();
+  const [deleteSubCategory] = useDeleteSubCategoryMutation()
+
+  const openCreateModal = useCallback(() => {
+    setMode("create");
+    setRecord(null);
+    form.resetFields();
+    setModalVisible(true);
+  }, [form]);
+
+  const openUpdateModal = useCallback((rec) => {
+    setMode("update");
+    setRecord(rec);
+    form.setFieldsValue(rec);
+    setModalVisible(true);
+  }, [form]);
+
+  const handleDeleteCategory = useCallback(async (rec) => {
+    try {
+      const data = {
+        id: location?.id,
+        subcategoryId: rec?._id
+      }
+      await deleteSubCategory(data).unwrap().then((res) => {
+        if (res?.success) {
+          toast.success(res?.message || "Sub Category deleted successfully")
+          setModalVisible(false);
+          form.resetFields();
+        }
+      })
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong")
+    }
+  }, [deleteSubCategory, location?.id, form]);
+
+  const handleSubmit = useCallback(
+    async (values) => {
+      try {
+        if (!location?.id) throw new Error("Category ID is required");
+
+        const payload = {
+          categoryId: location.id,
+          name: values.name,
+          ...(mode === "update" && { subcategoryId: record?._id }),
+        };
+
+        const action = mode === "create" ? createSubCategory : updateSubCategory;
+
+        const res = await action(payload).unwrap();
+        if (res?.success) {
+          toast.success(res?.message || `Sub Category ${mode}d successfully`);
+          setModalVisible(false);
+          form.resetFields();
+        }
+      } catch (error) {
+        toast.error(error?.data?.message || "Something went wrong");
+      }
     },
-    {
-      _id: "2",
-      request_id: "#121212",
-      key: "2",
-      name: "sub category 2",
-      status: "Rejected",
-      avatar: "https://avatar.iran.liara.run/public/20",
-    },
-  ];
-
-  const handleAddCategory = useCallback(() => {
-    setAddCategoryModalVisible(true)
-  }, []);
-
-  const handleEditCategory = useCallback((record) => {
-    setUpdateCategoryModalVisible(true)
-    setRecord(record)
-  }, []);
-
-  const handleDeleteCategory = useCallback((record) => {
-    console.log("Delete Category", record);
-  }, []);
-
-  const handleSubmitCategory = useCallback((values) => {
-    console.log("Submit Category", values);
-  }, []);
+    [mode, record, location?.id, form, createSubCategory, updateSubCategory]
+  );
 
   return (
     <div>
       <BackButton message="Back to Categories" className="mb-5 hover:text-[#F57C00]" />
-      <CustomButton onClick={handleAddCategory} title="Add Sub Category" icon="plus" />
+      <CustomButton onClick={openCreateModal} title="Add Sub Category" icon="plus" />
       <Table
-        columns={subCategoryManageColumns(handleEditCategory, handleDeleteCategory)}
-        dataSource={data}
+        loading={isLoading || isFetching}
+        columns={subCategoryManageColumns(openUpdateModal, handleDeleteCategory)}
+        dataSource={subCategories?.data?.subcategories || []}
         pagination={false}
         scroll={{ x: "max-content" }}
         size="large"
         bordered
+        rowKey="_id"
       />
-      <CategoryForm
-        open={addCategoryModalVisible}
-        hide={setAddCategoryModalVisible}
-        onFinish={handleSubmitCategory}
-        title="Add Sub Category"
-      />
-      <CategoryForm
+
+      <SubCategoryForm
+        form={form}
+        open={modalVisible}
+        hide={() => setModalVisible(false)}
+        onFinish={handleSubmit}
+        title={mode === "create" ? "Add Sub Category" : "Update Sub Category"}
+        loading={isCreating || isUpdating}
+        isUpdate={mode === "update"}
         record={record}
-        open={updateCategoryModalVisible}
-        hide={setUpdateCategoryModalVisible}
-        onFinish={handleSubmitCategory}
-        title="Update Sub Category"
       />
     </div>
   );

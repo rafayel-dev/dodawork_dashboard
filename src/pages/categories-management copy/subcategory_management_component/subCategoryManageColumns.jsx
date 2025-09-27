@@ -1,17 +1,12 @@
 import React from "react";
 import { Button, Popconfirm, Space } from "antd";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import UserImage from "../../../components/user/UserImage";
-import { GrLinkNext } from "react-icons/gr";
 
 export const subCategoryManageColumns = (onEdit, onDelete) => [
   {
     title: "Sub Category",
     dataIndex: "name",
     key: "name",
-    render: (text, record) => (
-      <UserImage user={{ name: text, avatar: record.avatar }} />
-    ),
   },
   {
     title: "Action",
