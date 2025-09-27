@@ -22,7 +22,7 @@ const Layout = () => {
         name: superAdminProfile?.data?.name || "",
         email: superAdminProfile?.data?.email || "",
         avatar: imageUrl(superAdminProfile?.data?.profile_image) || "",
-        role: superAdminProfile?.data?.role || "",
+        role: superAdminProfile?.data?.authId?.role || "",
       });
     }
   }, [superAdminProfile, superAdminProfileLoading]);
@@ -62,6 +62,7 @@ const Layout = () => {
       <MainSidebar
         setIsSidebarOpen={setIsSidebarOpen}
         isSidebarOpen={isSidebarOpen}
+        role={user?.role}
         toggleSidebar={toggleSidebar}
       />
 

@@ -7,13 +7,16 @@ import { useLocation } from "react-router-dom";
 
 import main_logo from "../../assets/main_logo.svg";
 import cn from "../../lib/cn";
-import { menuItems } from "./sidebarRoutes";
+import { menuItems, superAdminMenuItems } from "./sidebarRoutes";
+import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis";
 
 function MainSidebar({ toggleSidebar, isSidebarOpen }) {
   const location = useLocation();
-  
+  const { data: superAdminProfile, isLoading: superAdminProfileLoading } = useGetSuperAdminProfileQuery()
   const isActive = (path) =>
     location.pathname === path ? "bg-[var(--secondary-color)]" : "";
+  console.log(superAdminProfile?.data?.authId?.role)
+  const menu = superAdminProfile?.data?.authId?.role === "SUPER_ADMIN" ? superAdminMenuItems : menuItems;
   return (
     <div
       className={cn(
@@ -35,7 +38,7 @@ function MainSidebar({ toggleSidebar, isSidebarOpen }) {
       </div>
       <nav className="mt-4">
         <ul>
-          {menuItems.map((item) => (
+          {menu.map((item) => (
             <li key={item.path} className="mb-1">
               <NavLink
                 to={item.path}
