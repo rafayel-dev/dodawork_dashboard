@@ -1,27 +1,36 @@
-import React, { useState } from "react";
-import { PageLayout, PageContent } from "../../components/PageLayout";
-import { Button, Card, Form, Input, Modal, Space, Empty, Typography } from "antd";
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Empty,
+  Typography,
+  Popconfirm,
+} from "antd";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-
-const { Title, Paragraph } = Typography;
+import {
+  useGetFaqsQuery,
+  useAddFaqMutation,
+  useUpdateFaqMutation,
+  useDeleteFaqMutation,
+} from "../../RTK/services/dashboard/informationApis/faqApis";
+import { PageLayout, PageContent } from "../../components/PageLayout";
+import toast from "react-hot-toast";
+const { Paragraph } = Typography;
 
 const FAQ = () => {
-  const [faq, setFaq] = useState([
-    {
-      question: "What is DODA Work?",
-      answer:
-        "DODA Work is a platform for service providers to provide their services to users.",
-    },
-    {
-      question: "What is the difference between DODA Work and other platforms?",
-      answer:
-        "The main difference is that DODA Work focuses on connecting service providers directly with users.",
-    },
-  ]);
+  const { data: faqs, isLoading } = useGetFaqsQuery();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [form] = Form.useForm();
+
+  const [addFaq, { isLoading: addLoading }] = useAddFaqMutation();
+  const [updateFaq, { isLoading: updateLoading }] = useUpdateFaqMutation();
+  const [deleteFaq] = useDeleteFaqMutation();
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
@@ -33,15 +42,61 @@ const FAQ = () => {
     }
   };
 
-  const handleDelete = (item) => {
-    console.log("Delete:", item);
-    alert("Delete Coming Soon")
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+    form.resetFields();
+  };
+
+
+  const handleSubmit = async (values) => {
+    try {
+      if (editingItem) {
+        if (!editingItem?._id) {
+          throw new Error("Invalid FAQ ID");
+        }
+        const data = { faqId: editingItem?._id, ...values }
+        await updateFaq(data).unwrap().then((res) => {
+          if (res?.success) {
+            toast.success(res?.message || "FAQ updated successfully");
+            handleCloseModal();
+          } else {
+            throw new Error(res?.message || "Failed to update FAQ");
+          }
+        })
+      } else {
+        await addFaq(values).unwrap().then((res) => {
+          if (res?.success) {
+            toast.success(res?.message || "FAQ created successfully");
+            handleCloseModal()
+          }
+        })
+        handleCloseModal();
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || error?.message || "Something went wrong");
+    }
+  };
+
+  const handleDelete = async (item) => {
+    try {
+      if (!item?._id) return toast.error("Invalid FAQ ID");
+      const data = {
+        faqId: item?._id
+      }
+      const res = await deleteFaq(data).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "FAQ deleted successfully");
+        handleCloseModal();
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || error?.message || "Failed to delete FAQ");
+    }
   };
 
   return (
     <PageLayout title="Frequently Asked Questions">
       <PageContent>
-        {/* Header Actions */}
         <div className="flex items-center justify-between mb-6">
           <Button
             style={{ backgroundColor: "var(--primary-color)", color: "white" }}
@@ -52,31 +107,44 @@ const FAQ = () => {
           </Button>
         </div>
 
-        {/* FAQ Grid */}
-        {faq.length ? (
+        {faqs?.data?.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {faq.map((item, index) => (
+            {faqs?.data?.map((item) => (
               <Card
-                key={index}
+                loading={isLoading}
+                key={item?._id}
                 className="transition-shadow duration-300 rounded-2xl"
                 title={
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-base">{item.question}</span>
+                    <span className="font-medium text-base">
+                      {item?.question}
+                    </span>
                     <Space>
                       <FaEdit
                         className="cursor-pointer text-blue-500 hover:text-blue-600"
-                        onClick={() => handleOpenModal(item)}
+                        onClick={() => {
+                          setEditingItem(item?._id)
+                          handleOpenModal(item)
+                        }}
                       />
-                      <FaTrash
-                        className="cursor-pointer text-red-500 hover:text-red-600"
-                        onClick={() => handleDelete(item)}
-                      />
+                      <Popconfirm
+                        title="Are you sure to delete this FAQ?"
+                        onConfirm={() => handleDelete(item)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <FaTrash
+                          className="cursor-pointer text-red-500 hover:text-red-600"
+                        />
+                      </Popconfirm>
                     </Space>
                   </div>
                 }
               >
-                <Paragraph ellipsis={{ rows: 3, expandable: true, symbol: "more" }}>
-                  {item.answer}
+                <Paragraph
+                  ellipsis={{ rows: 3, expandable: true, symbol: "more" }}
+                >
+                  {item?.description}
                 </Paragraph>
               </Card>
             ))}
@@ -95,18 +163,16 @@ const FAQ = () => {
           open={isModalOpen}
           centered
           width={600}
-          onCancel={() => setIsModalOpen(false)}
+          onCancel={handleCloseModal}
           footer={null}
+          destroyOnClose
         >
           <Form
             form={form}
             layout="vertical"
             requiredMark={false}
             name="faq_form"
-            onFinish={(values) => {
-              console.log("Submitted values:", values);
-              setIsModalOpen(false);
-            }}
+            onFinish={handleSubmit}
           >
             <Form.Item
               name="question"
@@ -116,7 +182,7 @@ const FAQ = () => {
               <Input placeholder="Enter the FAQ question" />
             </Form.Item>
             <Form.Item
-              name="answer"
+              name="description"
               label="Answer"
               rules={[{ required: true, message: "Please enter an answer" }]}
             >
@@ -124,11 +190,12 @@ const FAQ = () => {
             </Form.Item>
             <Form.Item>
               <div className="flex justify-end gap-3">
-                <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                <Button onClick={handleCloseModal}>Cancel</Button>
                 <Button
                   type="primary"
                   style={{ backgroundColor: "var(--primary-color)" }}
                   htmlType="submit"
+                  loading={addLoading || updateLoading}
                 >
                   {editingItem ? "Update FAQ" : "Create FAQ"}
                 </Button>
