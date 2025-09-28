@@ -11,7 +11,7 @@ export const adminTableColumn = ({ handleBlock, handleDelete, handleEdit }) => [
         dataIndex: "name",
         key: "name",
         render: (_, record) => (
-            <UserImage user={{ name: record.name, avatar: record.avatar }} />
+            <UserImage user={{ name: record.name, avatar: record.profile_image }} />
         )
     },
     {
@@ -28,11 +28,16 @@ export const adminTableColumn = ({ handleBlock, handleDelete, handleEdit }) => [
         }
     },
     {
+        title: 'Phone Number',
+        dataIndex: 'phoneNumber',
+        key: 'phoneNumber'
+    },
+    {
         title: 'Status',
         dataIndex: 'isBlocked',
         key: 'isBlocked',
         render: (_, record) => {
-            return record.isBlocked ? <Tag color="red">Blocked</Tag> : <Tag color="green">Not Blocked</Tag>
+            return record.authId?.isBlocked ? <Tag color="red">Blocked</Tag> : <Tag color="green">Not Blocked</Tag>
         }
     },
     {
@@ -40,14 +45,18 @@ export const adminTableColumn = ({ handleBlock, handleDelete, handleEdit }) => [
         render: (_, record) => {
             return (
                 <Space>
-                    <Tooltip title={record.isBlocked ? "Unblock" : "Block"}>
-                        <Popconfirm title={`Are you sure to ${record.isBlocked ? "unblock" : "block"} this admin?`} placement="topRight" okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }} onConfirm={() => handleBlock(record._id)}>
+                    <Tooltip title={record.authId?.isBlocked ? "Unblock" : "Block"}>
+                        <Popconfirm
+                            title={`Are you sure to ${record.authId?.isBlocked ? "unblock" : "block"} this admin?`}
+                            placement="topRight"
+                            okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }}
+                            onConfirm={() => handleBlock(record?.authId?._id, record.authId?.isBlocked)}>
                             <Button
                                 style={{
                                     backgroundColor: "#FFBA00",
                                     color: "white"
                                 }}
-                                className={cn("", record.isBlocked && "!bg-gray-500")}
+                                className={cn("", record.authId?.isBlocked && "!bg-gray-500")}
                                 shape="circle"
                                 icon={<FaUserLock />}
                                 type="primary"
@@ -64,7 +73,7 @@ export const adminTableColumn = ({ handleBlock, handleDelete, handleEdit }) => [
                                     color: "white"
                                 }
                             }}
-                            onConfirm={() => handleDelete(record._id)}
+                            onConfirm={() => handleDelete(record?._id)}
                         >
                             <Button
                                 style={{

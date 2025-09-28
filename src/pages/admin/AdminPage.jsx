@@ -4,30 +4,17 @@ import { Button, Input, Modal, Table } from 'antd'
 import { adminTableColumn } from './admin-component/AdminTableColumn'
 import { FaPlus } from 'react-icons/fa'
 import AdminForm from './admin-component/AdminForm'
+import { useBlockUnblockAdminMutation, useDeleteAdminMutation, useGetAllAdminQuery } from '../../RTK/services/dashboard/authorised-teams/admins/adminApis'
+import toast from 'react-hot-toast'
 function AdminPage() {
-    const data = [
-        {
-            _id: "1",
-            name: "Hosain Ahmed",
-            email: "hosainahmed534745@gmail.com",
-            createdAt: "2023-01-01",
-            avatar: 'https://avatar.iran.liara.run/public/15',
-            isBlocked: false,
-        },
-        {
-            _id: "2",
-            name: "Tanjim",
-            email: "tanjim@gmail.com",
-            createdAt: "2023-01-01",
-            avatar: 'https://avatar.iran.liara.run/public/15',
-            isBlocked: true,
-        },
-    ]
-
+    const [searchTerm, setSearchTerm] = useState("")
+    const { data: adminInformationData, isLoading: adminDataLoading, isFetching } = useGetAllAdminQuery({
+        searchTerm: searchTerm
+    })
     const [open, setOpen] = useState(false)
-    const hide = useCallback((value) => {
-        setOpen(!value)
-    }, [])
+    const hide = useCallback(() => {
+        setOpen(false)
+    }, [open])
     const handleAddAdmin = useCallback(() => {
         setOpen(true);
     }, []);
@@ -35,14 +22,14 @@ function AdminPage() {
         <PageLayout title="Admin">
             <PageContent>
                 <div className='flex justify-between items-center'>
-                    <Input.Search style={{ width: "260px" }} placeholder="Search" />
+                    <Input.Search loading={isFetching} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: "260px" }} placeholder="Search" />
                     <Button
                         icon={<FaPlus />}
                         onClick={handleAddAdmin}
                         style={{ backgroundColor: "var(--primary-color)", color: "white", border: "none", borderRadius: "5px", padding: "5px 10px", fontSize: "14px", fontWeight: "bold", cursor: "pointer", transition: "all 0.3s ease-in-out", boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)", marginBottom: "10px", }}
                     >Add Admin</Button>
                 </div>
-                <AdminTable data={data} />
+                <AdminTable data={adminInformationData?.data?.admins} loading={adminDataLoading} />
                 <Modal
                     title="Add Admin"
                     open={open}
@@ -61,19 +48,52 @@ function AdminPage() {
 export default AdminPage
 
 
-const AdminTable = ({ data }) => {
+const AdminTable = ({ data, loading }) => {
     const [openEdit, setOpenEdit] = useState(false)
     const [editId, setEditId] = useState(null)
+    const [blockUnblockAdmin] = useBlockUnblockAdminMutation()
+    const [deleteAdmin] = useDeleteAdminMutation()
     const hideEdit = useCallback(() => {
         setOpenEdit(false)
     }, [])
-    const handleBlock = useCallback((id) => {
-        console.log(id)
-    }, [])
-    const handleDelete = useCallback((id) => {
-        alert("Delete")
-        console.log(id)
-    }, [])
+    const handleBlock = useCallback(async (id, isBlocked) => {
+        try {
+            const data = {
+                authId: id,
+                isBlocked: isBlocked ? 'false' : 'true'
+            }
+            await blockUnblockAdmin(data).unwrap().then((res) => {
+                if (res?.success) {
+                    toast.success(res?.message || "Admin blocked successfully")
+                } else {
+                    throw new Error(res?.message || "Something went wrong")
+                }
+            })
+        } catch (error) {
+            toast.error(error?.data?.message || error?.message || "Something went wrong")
+        }
+    }, [blockUnblockAdmin])
+
+    const handleDelete = useCallback(async (id) => {
+        try {
+            if (!id) {
+                throw new Error("Admin ID is required")
+            }
+            const data = {
+                adminId: id
+            }
+            await deleteAdmin(data).unwrap().then((res) => {
+                if (res?.success) {
+                    toast.success(res?.message || "Admin deleted successfully")
+                } else {
+                    throw new Error(res?.message || "Something went wrong")
+                }
+            })
+        } catch (error) {
+            toast.error(error?.data?.message || error?.message || "Something went wrong")
+        }
+    }, [deleteAdmin])
+
     const handleEdit = useCallback((record) => {
         setEditId(record)
         setOpenEdit(true)
@@ -86,6 +106,8 @@ const AdminTable = ({ data }) => {
                 bordered
                 columns={adminTableColumn({ handleBlock, handleDelete, handleEdit })}
                 dataSource={data}
+                scroll={{ x: "max-content" }}
+                loading={loading}
                 pagination={false}
             />
             <Modal
@@ -96,7 +118,7 @@ const AdminTable = ({ data }) => {
                 footer={null}
                 closeIcon={false}
             >
-                <AdminForm open={openEdit} hide={hideEdit} data={editId} />
+                <AdminForm openEdit={openEdit} hide={hideEdit} data={editId} />
             </Modal>
         </>
     )

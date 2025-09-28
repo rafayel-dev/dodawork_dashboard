@@ -46,7 +46,7 @@ function SubcategoryManageTable() {
   const handleDeleteCategory = useCallback(async (rec) => {
     try {
       const data = {
-        id: location?.id,
+        categoryId: location?.id,
         subcategoryId: rec?._id
       }
       await deleteSubCategory(data).unwrap().then((res) => {

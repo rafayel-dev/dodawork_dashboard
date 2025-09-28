@@ -15,7 +15,6 @@ function MainSidebar({ toggleSidebar, isSidebarOpen }) {
   const { data: superAdminProfile, isLoading: superAdminProfileLoading } = useGetSuperAdminProfileQuery()
   const isActive = (path) =>
     location.pathname === path ? "bg-[var(--secondary-color)]" : "";
-  console.log(superAdminProfile?.data?.authId?.role)
   const menu = superAdminProfile?.data?.authId?.role === "SUPER_ADMIN" ? superAdminMenuItems : menuItems;
   return (
     <div

@@ -30,7 +30,7 @@ const subCategoriseApi = baseApi.injectEndpoints({
       query: (params) => ({
         url: `/category/delete-subcategory`,
         method: "DELETE",
-        body: params,
+        params,
       }),
       invalidatesTags: ["SubCategory"],
     }),
