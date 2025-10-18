@@ -1,38 +1,43 @@
 import React, { useEffect } from "react";
 import { Button, Form, Input } from "antd";
-// import toast from "react-hot-toast";
-// import { useUpdateProfileDataMutation } from "../../src/Redux/services/profileApis";
+import toast from "react-hot-toast";
+import { useEditSuperAdminProfileMutation } from "../../RTK/services/profileApis/superAdminProfileApis";
 
 const ProfileEdit = ({ image, data }) => {
-  console.log(image);
   const [form] = Form.useForm();
 
-  // const [setProfileUpdate, { isLoading: isProfileUpdate }] =
-  //   useUpdateProfileDataMutation();
+  const [setProfileUpdate, { isLoading: isProfileUpdate }] =
+    useEditSuperAdminProfileMutation();
 
   useEffect(() => {
     form.setFieldsValue({
       name: data?.name,
       email: data?.email,
+      phoneNumber: data?.phoneNumber,
+      address: data?.address,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const onFinish = async (values) => {
-    console.log(values);
-    // const formData = new FormData();
-    // formData.append("name", values?.name);
-    // if (image === null) {
-    //   formData.delete("profile_image");
-    // } else {
-    //   formData.append("profile_image", image);
-    // }
+    const formData = new FormData();
+    formData.append("name", values?.name);
+    formData.append("email", values?.email);
+    formData.append("phoneNumber", values?.phoneNumber);
+    formData.append("address", values?.address);
+    if (image === null) {
+      formData.delete("profile_image");
+    } else {
+      formData.append("profile_image", image);
+    }
 
     try {
-      // await setProfileUpdate({ data: formData }).unwrap();
-    //   toast.success("Profile updated successfully (dummy)");
+      await setProfileUpdate(formData).unwrap().then((res) => {
+        if (res?.success) {
+          toast.success("Profile updated successfully");
+        }
+      });
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      toast.error(error?.data?.message || error?.message || "Failed to update profile");
     }
   };
 
@@ -71,11 +76,11 @@ const ProfileEdit = ({ image, data }) => {
           />
         </Form.Item>
         <Form.Item
-          name="phone"
+          name="phoneNumber"
           label={<span className="text-black">Contact Number</span>}
         >
           <Input
-            type="number"
+            type="text"
             size="large"
             placeholder="Phone Number"
             className="cursor-not-allowed p-2 w-full outline-none border-none !bg-white text-black"
@@ -94,7 +99,8 @@ const ProfileEdit = ({ image, data }) => {
         </Form.Item>
         <Button
           htmlType="submit"
-          // disabled={isProfileUpdate}
+          disabled={isProfileUpdate}
+          loading={isProfileUpdate}
           style={{
             color: "#fff",
             height: 40,

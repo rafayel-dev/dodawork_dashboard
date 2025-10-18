@@ -7,6 +7,7 @@ const superAdminProfileApis = baseApi.injectEndpoints({
         url: "/super-admin/profile",
         method: "GET",
       }),
+      providesTags: ["SuperAdmin"],
     }),
     editSuperAdminProfile: builder.mutation({
       query: (data) => ({
@@ -14,6 +15,7 @@ const superAdminProfileApis = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      invalidatesTags: ["SuperAdmin"],
     }),
   }),
 });

@@ -22,6 +22,7 @@ export const baseApi = createApi({
     "PrivacyPolicy",
     "faqs",
     "Admin",
+    "SuperAdmin"
   ],
   endpoints: () => ({}),
 });

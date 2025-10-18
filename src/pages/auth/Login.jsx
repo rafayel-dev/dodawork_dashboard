@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import brandIcon from '../../../src/assets/brandIcon.svg';
 import { useLoginMutation } from '../../RTK/services/auth/authApi';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../../RTK/slices/authSlice';
 
 const { Title, Paragraph } = Typography;
 
@@ -11,6 +13,8 @@ const Login = () => {
   const [login, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -29,18 +33,18 @@ const Login = () => {
 
     try {
       const res = await login({ email, password }).unwrap();
-
       if (!res?.success) {
         throw new Error(res?.message || 'Something went wrong');
       }
-
-      if (localStorage.getItem('accessToken')) {
-        localStorage.removeItem('accessToken');
+      localStorage.setItem("accessToken", res?.data?.accessToken)
+      if (res?.success) {
+        dispatch(
+          setUser({
+            user: res?.data?.user || {},
+            token: res?.data?.accessToken,
+          })
+        );
       }
-
-      localStorage.setItem('accessToken', res?.data?.accessToken);
-      toast.success(res?.message || 'Login successful');
-
       navigate('/');
     } catch (error) {
       toast.error(error?.data?.message || error?.message || 'Something went wrong');

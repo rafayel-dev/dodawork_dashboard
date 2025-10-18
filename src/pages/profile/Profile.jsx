@@ -1,38 +1,42 @@
 import React, { useState } from "react";
 import { Button } from "antd";
 import { FaCameraRetro } from "react-icons/fa6";
-// import { imageUrl } from "../../utils/server.js";
 import ProfileEdit from "../../components/profile-component/ProfileEdit.jsx";
 import ChangePassword from "../../components/profile-component/ChangePassword.jsx";
+import { useSelector } from "react-redux";
+import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis.js";
+import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/authorised-teams/admins/adminApis.js";
+import { imageUrl } from "../../utils/optimizationFunction.js";
 
 const Tabs = ["Edit Profile", "Change Password"];
 
 const Profile = () => {
   const [tab, setTab] = useState(Tabs[0]);
-  // const { data: profileData } = useGetProfileDataQuery({});
+  const { user } = useSelector((state) => state.auth);
+  const { data: superAdminProfile } = useGetSuperAdminProfileQuery(undefined, { skip: user?.authId?.role !== "SUPER_ADMIN" })
+  const { data: adminProfile } = useGetProfileAdminQuery(undefined, { skip: user?.authId?.role !== "ADMIN" })
+  console.log(adminProfile)
+  console.log(superAdminProfile)
+
+
   const [image, setImage] = useState(null);
 
   const handleImageUpload = (e) => {
     if (e.target.files?.[0]) {
       setImage(e.target.files[0]);
-      localStorage.setItem("image", e.target.files[0].name); // storing only filename for now
+      localStorage.setItem("image", e.target.files[0].name);
     }
   };
 
-  // Dummy profile data
-  const profileData = {
-    data: {
-      name: "John Doe",
-      email: "johndoe@example.com",
-      profile_image: null,
-    },
-  };
 
   const profileImage = image
     ? URL.createObjectURL(image)
-    : // : profileData?.data?.profile_image
-      // ? imageUrl(profileData.data.profile_image)
-      "https://placehold.co/400";
+    : user?.authId?.role === "SUPER_ADMIN" ? superAdminProfile?.data?.profile_image
+      ? imageUrl(superAdminProfile?.data?.profile_image)
+      : "https://placehold.co/400"
+      : adminProfile?.data?.profile_image
+        ? imageUrl(adminProfile?.data?.profile_image)
+        : "https://placehold.co/400";
 
   return (
     <div className="rounded p-4">
@@ -73,7 +77,7 @@ const Profile = () => {
           </div>
         </div>
         <p className="text-2xl text-center text-black mt-2">
-          {profileData?.data?.name || "User Name"}
+          {user?.authId?.role === "SUPER_ADMIN" ? superAdminProfile?.data?.name : adminProfile?.data?.name || "User Name"}
         </p>
       </div>
 
@@ -83,11 +87,10 @@ const Profile = () => {
           <Button
             key={item}
             style={{ width: "200px", justifyContent: "center" }}
-            className={`${
-              item === tab
-                ? "!bg-[var(--secondary-color)] !text-black !border-0 !rounded-sm"
-                : "!border-0 !rounded-none !text-black !border-white !bg-transparent"
-            }`}
+            className={`${item === tab
+              ? "!bg-[var(--secondary-color)] !text-black !border-0 !rounded-sm"
+              : "!border-0 !rounded-none !text-black !border-white !bg-transparent"
+              }`}
             onClick={() => setTab(item)}
           >
             {item}
@@ -100,7 +103,7 @@ const Profile = () => {
           <ProfileEdit
             image={image}
             defaultImage={"https://placehold.co/400"}
-            data={profileData?.data}
+            data={user?.authId?.role === "SUPER_ADMIN" ? superAdminProfile?.data : adminProfile?.data}
           />
         ) : (
           <ChangePassword />

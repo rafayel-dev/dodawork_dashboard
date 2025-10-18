@@ -42,6 +42,13 @@ const adminApis = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Admin"],
     }),
+    getProfileAdmin: builder.query({
+      query: () => ({
+        url: "/admin/get-profile-admin",
+        method: "GET",
+      }),
+      providesTags: ["Admin"],
+    }),
   }),
 });
 
@@ -51,4 +58,5 @@ export const {
   useUpdateAdminMutation,
   useDeleteAdminMutation,
   useBlockUnblockAdminMutation,
+  useGetProfileAdminQuery,
 } = adminApis;

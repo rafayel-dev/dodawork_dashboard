@@ -3,18 +3,15 @@ import Notifications from "../Notifications/Notifications";
 import { FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
+import { handleLogout } from "./logOutHandler";
+import { useSelector } from "react-redux";
 
-export const handleLogout = () => {
-  localStorage.removeItem("accessToken");
-  if (window !== undefined) {
-    window.location.reload();
-  }
-};
 
 function Header({ user, toggleSidebar }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
-
+  const payload = useSelector((state) => state.auth);
+  
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
   };
