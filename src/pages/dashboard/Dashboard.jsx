@@ -10,17 +10,30 @@ import CompletionRate from "../../components/charts/CompletionRate";
 import AwaitingRequeststable from "../awaiting-requests/request_component/AwaitingRequeststable";
 import { Button } from "antd";
 import { Link } from "react-router-dom";
+import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import Loading from "../../components/common/Loading";
+import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/useServiceRequest";
 
 const Dashboard = () => {
+  const { data: userData, isLoading } = useGetAdminUsersQuery();
+  const { data: serviceRequestData, isLoading: isLoading2 } =
+    useGetAllServiceRequestQuery();
+
+  if (isLoading || isLoading2) {
+    <Loading />;
+  }
+  console.log(serviceRequestData?.data?.meta.total);
+
   const data = [
     {
       title: "Total Users",
-      number: 340,
+
+      number: userData?.data.meta.total | 0,
       icon: user,
     },
     {
       title: "Total Requests",
-      number: 120,
+      number: serviceRequestData?.data?.meta.total | 0,
       icon: total_requests,
     },
     {
@@ -49,7 +62,9 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-black line-clamp-1">Awaiting Requests</h1>
+          <h1 className="text-2xl font-bold text-black line-clamp-1">
+            Awaiting Requests
+          </h1>
           <Link to="/awaiting-requests">
             <Button type="link" className="text-[var(--primary-color)]">
               Show All
