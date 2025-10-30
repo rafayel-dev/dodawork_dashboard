@@ -18,7 +18,7 @@ function AwaitingRequeststable({ pagination }) {
   if (isLoading) {
     <Loading />;
   }
-  console.log(pendingRequest);
+
   const BASE_URL = `${baseUrl}/`;
 
   const data = pendingRequest?.map((item) => ({
@@ -47,10 +47,6 @@ function AwaitingRequeststable({ pagination }) {
         ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
         : "https://via.placeholder.com/150",
   }));
-
-  console.log(data);
-
-  console.log(data, "my");
 
   const handleView = useCallback((record) => {
     setSelectedRequest(record);

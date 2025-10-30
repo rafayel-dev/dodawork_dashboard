@@ -9,6 +9,7 @@ const serviceRequestApi = baseApi.injectEndpoints({
       }),
       providesTags: ["serviceRequest"],
     }),
+    updateServiceRequest: builder.mutation({}),
   }),
 });
 export const { useGetAllServiceRequestQuery } = serviceRequestApi;
