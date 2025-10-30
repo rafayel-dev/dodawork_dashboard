@@ -12,17 +12,20 @@ import { Button } from "antd";
 import { Link } from "react-router-dom";
 import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
 import Loading from "../../components/common/Loading";
-import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/useServiceRequest";
+import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
+import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 
 const Dashboard = () => {
   const { data: userData, isLoading } = useGetAdminUsersQuery();
   const { data: serviceRequestData, isLoading: isLoading2 } =
     useGetAllServiceRequestQuery();
+  const { data: serviceProvider, isLoading: isLoading3 } =
+    useGetAllServiceProvidersQuery();
 
-  if (isLoading || isLoading2) {
+  if (isLoading || isLoading2 || isLoading3) {
     <Loading />;
   }
-  console.log(serviceRequestData?.data?.meta.total);
+  console.log(serviceProvider?.data?.meta.total);
 
   const data = [
     {
@@ -42,8 +45,8 @@ const Dashboard = () => {
       icon: total_income,
     },
     {
-      title: "Service Provdiers",
-      number: 213,
+      title: "Service Provider",
+      number: serviceProvider?.data?.meta.total,
       icon: service_providers,
     },
   ];

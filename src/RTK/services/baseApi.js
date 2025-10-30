@@ -25,6 +25,7 @@ export const baseApi = createApi({
     "SuperAdmin",
     "user",
     "serviceRequest",
+    "serviceProvider",
   ],
   endpoints: () => ({}),
 });
