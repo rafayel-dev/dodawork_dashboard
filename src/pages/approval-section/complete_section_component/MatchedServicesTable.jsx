@@ -3,53 +3,74 @@ import { Table, Modal, Tabs, ConfigProvider } from "antd";
 import { matchedServicesColumns } from "./matchedServicesColumns";
 import MatchedServicesDetailsCard from "./MatchedServicesDetailsCard";
 import { PlusOutlined } from "@ant-design/icons";
+import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
+import Loading from "../../../components/common/Loading";
+import { baseUrl } from "../../../utils/optimizationFunction";
 
 function MatchedServicesTable() {
+  const BASE_URL = `${baseUrl}/`;
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
   const [activeTab, setActiveTab] = useState("Approved");
+  const { data: serviceRequestData, isLoading } =
+    useGetAllServiceRequestQuery();
+  let serviceRequests = serviceRequestData?.data?.serviceRequests;
+  if (isLoading) {
+    <Loading />;
+  }
 
-  const data = [
-    {
-      request_id: "#121211",
-      key: "1",
-      name: "John Doe",
-      category: "Cleaning",
-      email: "7o4wP@example.com",
-      phone: "123-456-7890",
-      date: "2022-01-01",
-      time: "10:00 AM",
-      priority: "High",
-      status: "Approved",
-      avatar: "https://avatar.iran.liara.run/public/13",
-      action: "View",
-      video: false,
-      service_image_or_video:
-        "https://belasea.sgp1.digitaloceanspaces.com/media/products/CeraVe-Daily-Moisturising-Lotion-For-Normal-To-Dry-Skin-355ml-USA.png",
-    },
-    {
-      request_id: "#121212",
-      key: "2",
-      name: "Jane Smith",
-      category: "Repair",
-      email: "demo@example.com",
-      phone: "987-654-3210",
-      date: "2022-02-05",
-      time: "2:00 PM",
-      priority: "Low",
-      status: "Rejected",
-      avatar: "https://avatar.iran.liara.run/public/20",
-      action: "View",
-      video: false,
-      service_image_or_video:
-        "https://belasea.sgp1.digitaloceanspaces.com/media/products/CeraVe-Daily-Moisturising-Lotion-For-Normal-To-Dry-Skin-355ml-USA.png",
-    },
+  // ✅ Filter approved and rejected requests
+  const approveRequest =
+    serviceRequests?.filter((item) => item.status === "APPROVED") || [];
+
+  const rejectRequest =
+    serviceRequests?.filter((item) => item.status === "REJECTED") || [];
+
+  // ✅ Merge both into single array for the tabs
+  const allRequests = [...approveRequest, ...rejectRequest];
+
+  // ✅ Dynamic mapping to UI table format
+  const data = allRequests.map((item) => ({
+    request_id: item.requestId || item._id || "N/A",
+    key: item._id || Math.random().toString(),
+    name: item.customerId?.name || "Unknown",
+    category: item.serviceCategory?.name || "N/A",
+    email: item.customerId?.email || "N/A",
+    phone: item.customerId?.phoneNumber || item.customerPhone || "N/A",
+    date: item.startDate
+      ? new Date(item.startDate).toISOString().split("T")[0]
+      : "N/A",
+    time: item.startTime || "N/A",
+    priority: item.priority || "Normal",
+    status: item.status === "APPROVED" ? "Approved" : "Rejected",
+    avatar: "https://avatar.iran.liara.run/public/13",
+    action: "View",
+    video: Array.isArray(item.attachments)
+      ? item.attachments.some(
+          (a) =>
+            a.toLowerCase().endsWith(".mp4") || a.toLowerCase().endsWith(".mov")
+        )
+      : false,
+    service_image_or_video:
+      Array.isArray(item.attachments) && item.attachments.length > 0
+        ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
+        : "https://via.placeholder.com/150",
+  }));
+
+  // ✅ Filter data for active tab
+  const filteredData = useMemo(
+    () => data.filter((item) => item.status === activeTab),
+    [data, activeTab]
+  );
+
+  // ✅ Tab configuration
+  const items = [
+    { key: "Approved", label: "Approved" },
+    { key: "Rejected", label: "Rejected" },
   ];
 
-  const handleView = useCallback((record) => {
-    setSelectedRequest(record);
-  }, []);
-
+  // ✅ Handlers
+  const handleView = useCallback((record) => setSelectedRequest(record), []);
   const handleCancel = useCallback((record) => {
     setCancel(true);
     setTimeout(() => {
@@ -58,21 +79,7 @@ function MatchedServicesTable() {
     }, 2000);
   }, []);
 
-  const filteredData = useMemo(() => {
-    return data.filter((item) => item.status === activeTab);
-  }, [activeTab]);
-
-  const items = [
-    {
-      key: "Approved",
-      label: "Approved",
-    },
-    {
-      key: "Rejected",
-      label: "Rejected",
-    },
-  ];
-
+  // ✅ Render
   return (
     <div>
       <ConfigProvider
@@ -82,13 +89,16 @@ function MatchedServicesTable() {
             colorBgContainer: "#ffa337",
           },
         }}
-      ><Tabs
+      >
+        <Tabs
           type="card"
           size="middle"
           defaultActiveKey="Approved"
           items={items}
           onChange={(key) => setActiveTab(key)}
-        /></ConfigProvider>
+        />
+      </ConfigProvider>
+
       <Table
         columns={matchedServicesColumns(handleView)}
         dataSource={filteredData}
@@ -97,6 +107,7 @@ function MatchedServicesTable() {
         size="large"
         bordered
       />
+
       <Modal
         open={!!selectedRequest}
         footer={null}
