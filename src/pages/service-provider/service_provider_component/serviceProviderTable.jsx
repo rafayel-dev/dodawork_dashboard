@@ -18,10 +18,13 @@ function ServiceProviderTable() {
   if (isLoading) {
     <Loading />;
   }
-  console.log(serviceProvider?.data.providers);
-  const BASE_URL = `${baseUrl}/`;
 
-  const data = serviceProvider?.data.providers?.map((item) => ({
+  const BASE_URL = `${baseUrl}/`;
+  let providers = serviceProvider?.data.providers.filter((item) => {
+    if (item.isVerified === true) return item;
+  });
+
+  const data = providers?.map((item) => ({
     request_id: item._id || "N/A",
     key: item._id || Math.random().toString(),
     name: item.authId?.name || "Unknown",
@@ -58,7 +61,7 @@ function ServiceProviderTable() {
         ? `${BASE_URL}${item.attachments[1].replace(/\\/g, "/")}`
         : "https://via.placeholder.com/150",
   }));
-  console.log(data);
+
   // const data = [
   //   {
   //     request_id: "#121211",

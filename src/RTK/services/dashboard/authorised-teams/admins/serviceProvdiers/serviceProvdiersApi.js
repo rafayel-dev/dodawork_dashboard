@@ -9,7 +9,18 @@ const serviceProvidersApi = baseApi.injectEndpoints({
       }),
       providesTags: ["serviceProvider"],
     }),
+    verifyServiceProvider: builder.mutation({
+      query: (body) => ({
+        url: "/provider/verify",
+        method: "PATCH", // or PATCH — depends on your backend
+        body,
+      }),
+      invalidatesTags: ["serviceProvider"],
+    }),
   }),
 });
 
-export const { useGetAllServiceProvidersQuery } = serviceProvidersApi;
+export const {
+  useGetAllServiceProvidersQuery,
+  useVerifyServiceProviderMutation,
+} = serviceProvidersApi;
