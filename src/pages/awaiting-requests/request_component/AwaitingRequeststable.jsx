@@ -3,9 +3,21 @@ import { Table, Modal } from "antd";
 import { awaitingRequestsColumns } from "./awaitingRequestsColumns";
 import AwaitingRequestsDetailsCard from "./AwaitingRequestsDetailsCard";
 import { baseUrl } from "../../../utils/optimizationFunction";
-function AwaitingRequeststable({ pagination, pendingRequest }) {
+import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
+import Loading from "../../../components/common/Loading";
+function AwaitingRequeststable({ pagination }) {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
+  const { data: serviceRequestData, isLoading: isLoading } =
+    useGetAllServiceRequestQuery();
+  let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
+    (item) => {
+      if (item.status === "PENDING") return item;
+    }
+  );
+  if (isLoading) {
+    <Loading />;
+  }
   console.log(pendingRequest);
   const BASE_URL = `${baseUrl}/`;
 
