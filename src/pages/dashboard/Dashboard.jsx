@@ -25,7 +25,13 @@ const Dashboard = () => {
   if (isLoading || isLoading2 || isLoading3) {
     <Loading />;
   }
-  console.log(serviceProvider?.data?.meta.total);
+
+  let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
+    (item) => {
+      if (item.status === "PENDING") return item;
+    }
+  );
+  // console.log(pendingRequest);
 
   const data = [
     {
@@ -46,7 +52,7 @@ const Dashboard = () => {
     },
     {
       title: "Service Provider",
-      number: serviceProvider?.data?.meta.total,
+      number: serviceProvider?.data?.meta.total | 0,
       icon: service_providers,
     },
   ];
@@ -74,7 +80,10 @@ const Dashboard = () => {
             </Button>
           </Link>
         </div>
-        <AwaitingRequeststable pagination={false} />
+        <AwaitingRequeststable
+          pagination={false}
+          pendingRequest={pendingRequest}
+        />
       </PageContent>
     </PageLayout>
   );
