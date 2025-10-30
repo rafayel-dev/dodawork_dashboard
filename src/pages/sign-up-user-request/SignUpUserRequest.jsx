@@ -19,7 +19,7 @@ function SignUpUserRequest() {
   }
 
   let providers = serviceProvider?.data.providers.filter((item) => {
-    if (item.isVerified === false) return item;
+    if (item.isVerified === false && item.isRejected === false) return item;
   });
   console.log(providers);
   const BASE_URL = `${baseUrl}/`;
@@ -95,16 +95,29 @@ function SignUpUserRequest() {
     setRecord(record);
     setOpen(true);
   };
-  const handleDelete = (id) => {
-    alert("delete", id);
+  const handleDelete = async (id) => {
+    let bodyData = {
+      providerId: id,
+      isVerified: "false",
+      isRejected: "true",
+    };
+    console.log(bodyData, "reg");
+    try {
+      const response = await verifyProvider(bodyData).unwrap();
+
+      console.log("✅ Rejected successfully:", response);
+    } catch (error) {
+      console.error("❌ Rejected failed:", error);
+    }
   };
   const handleAccept = async (id) => {
-    console.log(id);
+    let bodyData = {
+      providerId: id,
+      isVerified: "true",
+      isRejected: "false",
+    };
     try {
-      const response = await verifyProvider({
-        providerId: id,
-        isVerified: "true",
-      }).unwrap();
+      const response = await verifyProvider(bodyData).unwrap();
 
       console.log("✅ Verified successfully:", response);
     } catch (error) {
