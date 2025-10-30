@@ -1,18 +1,19 @@
-import { Card, Button, Divider } from "antd";
+import { Card } from "antd";
 import React from "react";
 
-const UserDeailsCard = ({ user_profile, request_details }) => {
+const UserDeailsCard = ({ user_profile }) => {
+
     return (
         <Card>
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-24 h-20">
-                    <img src={user_profile.avatar} alt={user_profile.name} className="w-full h-full object-cover" />
+                    <img src={user_profile?.avatar} alt={user_profile?.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="w-full">
-                    <h2 className="font-semibold text-lg">{user_profile.name}</h2>
-                    <p className="text-gray-600">{user_profile.email}</p>
-                    <p className="text-gray-600">{user_profile.phone}</p>
-                    <p className="text-gray-500 text-sm">{user_profile.location}</p>
+                    <h2 className="font-semibold text-lg">{user_profile?.name}</h2>
+                    <p className="text-gray-600">{user_profile?.email}</p>
+                    <p className="text-gray-600">{user_profile?.phoneNumber}</p>
+                    <p className="text-gray-500 text-sm">{user_profile?.location}</p>
                 </div>
             </div>
 

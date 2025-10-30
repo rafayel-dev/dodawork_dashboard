@@ -6,28 +6,27 @@ import UserImage from "../../../components/user/UserImage";
 export const userManageColumns = (onView, handleBlock) => [
   {
     title: "User’s",
-    dataIndex: ["user_profile", "name"],
+    dataIndex: "name",
     key: "name",
     render: (_, record) => (
       <UserImage
         user={{
-          name: record.user_profile.name,
-          avatar: record.user_profile.avatar,
+          name: record?.name,
         }}
       />
     ),
   },
   {
     title: "Contact Number",
-    dataIndex: ["user_profile", "phone"],
+    dataIndex: "phoneNumber",
     key: "phone",
-    render: (_, record) => record.user_profile.phone,
+    render: (_, record) => record?.phoneNumber,
   },
   {
     title: "Email",
-    dataIndex: ["user_profile", "email"],
+    dataIndex: "email",
     key: "email",
-    render: (_, record) => record.user_profile.email,
+    render: (_, record) => record?.email,
   },
   {
     title: "Action",
@@ -41,7 +40,7 @@ export const userManageColumns = (onView, handleBlock) => [
           icon={<FaEye />}
         />
         <Popconfirm
-          title={`Are you sure to block ${record.user_profile.name}?`}
+          title={`Are you sure to block ${record?.name}?`}
           placement="topRight"
           okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }}
           onConfirm={() => handleBlock(record)}>
