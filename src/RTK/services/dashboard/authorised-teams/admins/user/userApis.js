@@ -12,7 +12,15 @@ const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Admin", "user"],
     }),
+    blockUser: builder.mutation({
+      query: (body) => ({
+        url: "/user/update-block-unblock-user",
+        method: "PATCH",
+        body, // expects { authId, isBlocked }
+      }),
+      invalidatesTags: ["Admin", "User"],
+    }),
   }),
 });
 
-export const { useGetAdminUsersQuery } = userApi;
+export const { useGetAdminUsersQuery, useBlockUserMutation } = userApi;

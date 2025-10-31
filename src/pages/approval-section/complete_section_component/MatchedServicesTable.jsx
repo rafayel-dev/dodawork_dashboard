@@ -18,7 +18,7 @@ function MatchedServicesTable() {
   if (isLoading) {
     <Loading />;
   }
-
+  console.log(serviceRequests, "match service");
   // ✅ Filter approved and rejected requests
   const approveRequest =
     serviceRequests?.filter((item) => item.status === "APPROVED") || [];

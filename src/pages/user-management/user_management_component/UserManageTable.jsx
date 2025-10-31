@@ -2,12 +2,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Table, Modal, Input } from "antd";
 import { userManageColumns } from "./userManageColumns";
 import UserDeailsCard from "./UserDeailsCard";
-import { useGetAdminUsersQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import {
+  useBlockUserMutation,
+  useGetAdminUsersQuery,
+} from "../../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import toast from "react-hot-toast";
 
 function UserManageTable() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [blockUser, { isLoading }] = useBlockUserMutation();
 
   // ✅ Debounce search term (wait 500ms after typing)
   useEffect(() => {
@@ -32,9 +37,28 @@ function UserManageTable() {
     setSelectedUser(record);
   }, []);
 
-  const handleBlock = useCallback((record) => {
-    alert(`${record?.user_profile?.name} blocked successfully`);
-  }, []);
+  const handleBlock = useCallback(
+    async (record) => {
+      const body = {
+        authId: record._id,
+        isBlocked: (!record.isBlocked).toString(), // toggle current status
+      };
+
+      try {
+        const res = await blockUser(body).unwrap();
+        toast.success(
+          `User ${record.isBlocked ? "unblocked" : "blocked"} successfully`
+        );
+
+        // Optionally refresh the user list if using RTK query
+        // refetch();
+      } catch (error) {
+        console.error("❌ Block/Unblock failed:", error);
+        toast.error("Failed to update user status");
+      }
+    },
+    [blockUser]
+  );
 
   return (
     <div>
