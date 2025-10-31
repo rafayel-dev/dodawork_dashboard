@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Popconfirm, Space } from "antd";
 import { FaEye, FaRegCheckCircle } from "react-icons/fa";
 import UserImage from "../../../components/user/UserImage";
+import { MdBlock } from "react-icons/md";
 
 export const userManageColumns = (onView, handleBlock) => [
   {
@@ -40,13 +41,27 @@ export const userManageColumns = (onView, handleBlock) => [
           icon={<FaEye />}
         />
         <Popconfirm
-          title={`Are you sure to block ${record?.name}?`}
+          title={`Are you sure to ${
+            !record?.authId?.isBlocked ? "block" : "unblock"
+          } ${record?.name}?`}
           placement="topRight"
-          okButtonProps={{ style: { backgroundColor: "#FFBA00", color: "white" } }}
-          onConfirm={() => handleBlock(record)}>
+          okButtonProps={{
+            style: { backgroundColor: "#FFBA00", color: "white" },
+          }}
+          onConfirm={() => handleBlock(record)}
+        >
           <Button
             shape="circle"
-            icon={<FaRegCheckCircle />}
+            icon={
+              record?.authId?.isBlocked ? (
+                <MdBlock className="!text-white" />
+              ) : (
+                <FaRegCheckCircle className="!text-white" />
+              )
+            }
+            style={{
+              backgroundColor: record?.authId?.isBlocked ? "red" : "green",
+            }}
           />
         </Popconfirm>
       </Space>

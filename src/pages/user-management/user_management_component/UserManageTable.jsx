@@ -38,15 +38,18 @@ function UserManageTable() {
 
   const handleBlock = useCallback(
     async (record) => {
+      console.log((!record?.authId?.isBlocked).toString());
       const body = {
         authId: record?.authId._id,
-        isBlocked: (!record.isBlocked).toString(), // toggle current status
+        isBlocked: !record?.authId?.isBlocked ? "true" : "false", // toggle current status
       };
 
       try {
         const res = await blockUser(body).unwrap();
         toast.success(
-          `User ${record.isBlocked ? "unblocked" : "blocked"} successfully`
+          `User ${
+            record?.authId?.isBlocked ? "unblocked" : "blocked"
+          } successfully`
         );
         console.log(res);
 
