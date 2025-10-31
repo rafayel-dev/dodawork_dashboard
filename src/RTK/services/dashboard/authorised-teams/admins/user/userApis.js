@@ -3,8 +3,11 @@ import { baseApi } from "../../../../baseApi";
 const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAdminUsers: builder.query({
-      query: () => ({
-        url: "/user/get-all-users",
+      // ✅ Accept optional searchTerm
+      query: (searchTerm = "") => ({
+        url: `/user/get-all-users${
+          searchTerm ? `?searchTerm=${searchTerm}` : ""
+        }`,
         method: "GET",
       }),
       providesTags: ["Admin", "user"],

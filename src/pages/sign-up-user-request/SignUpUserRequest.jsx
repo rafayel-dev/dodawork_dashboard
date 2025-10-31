@@ -9,6 +9,7 @@ import {
 } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
 import Loading from "../../components/common/Loading";
 import { baseUrl } from "../../utils/optimizationFunction";
+import toast from "react-hot-toast";
 
 function SignUpUserRequest() {
   const [verifyProvider, { isLoading: isLoading2 }] =
@@ -104,9 +105,11 @@ function SignUpUserRequest() {
     console.log(bodyData, "reg");
     try {
       const response = await verifyProvider(bodyData).unwrap();
-
+      toast.success("Rejected successfully");
       console.log("✅ Rejected successfully:", response);
     } catch (error) {
+      toast.error("Rejected failed");
+
       console.error("❌ Rejected failed:", error);
     }
   };
@@ -120,8 +123,10 @@ function SignUpUserRequest() {
       const response = await verifyProvider(bodyData).unwrap();
 
       console.log("✅ Verified successfully:", response);
+      toast.success("Verified successfully");
     } catch (error) {
       console.error("❌ Verification failed:", error);
+      toast.error("Verification failed");
     }
   };
   const [open, setOpen] = useState(false);
