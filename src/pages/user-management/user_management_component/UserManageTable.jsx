@@ -25,7 +25,6 @@ function UserManageTable() {
   // ✅ Fetch users based on debounced search term
   const { data: users, isLoading: userDataLoading } =
     useGetAdminUsersQuery(debouncedSearch);
-
   // ✅ Handlers
   const handleSearchChange = (e) => {
     const value = e.target.value.trim();
