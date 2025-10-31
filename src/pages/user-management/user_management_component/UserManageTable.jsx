@@ -40,7 +40,7 @@ function UserManageTable() {
   const handleBlock = useCallback(
     async (record) => {
       const body = {
-        authId: record._id,
+        authId: record?.authId._id,
         isBlocked: (!record.isBlocked).toString(), // toggle current status
       };
 
@@ -49,6 +49,7 @@ function UserManageTable() {
         toast.success(
           `User ${record.isBlocked ? "unblocked" : "blocked"} successfully`
         );
+        console.log(res);
 
         // Optionally refresh the user list if using RTK query
         // refetch();
