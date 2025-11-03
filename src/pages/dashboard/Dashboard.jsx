@@ -10,17 +10,39 @@ import CompletionRate from "../../components/charts/CompletionRate";
 import AwaitingRequeststable from "../awaiting-requests/request_component/AwaitingRequeststable";
 import { Button } from "antd";
 import { Link } from "react-router-dom";
+import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import Loading from "../../components/common/Loading";
+import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
+import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 
 const Dashboard = () => {
+  const { data: userData, isLoading } = useGetAdminUsersQuery();
+  const { data: serviceRequestData, isLoading: isLoading2 } =
+    useGetAllServiceRequestQuery();
+  const { data: serviceProvider, isLoading: isLoading3 } =
+    useGetAllServiceProvidersQuery();
+
+  if (isLoading || isLoading2 || isLoading3) {
+    <Loading />;
+  }
+
+  let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
+    (item) => {
+      if (item.status === "PENDING") return item;
+    }
+  );
+  // console.log(pendingRequest);
+
   const data = [
     {
       title: "Total Users",
-      number: 340,
+
+      number: userData?.data.meta.total | 0,
       icon: user,
     },
     {
       title: "Total Requests",
-      number: 120,
+      number: serviceRequestData?.data?.meta.total | 0,
       icon: total_requests,
     },
     {
@@ -29,8 +51,8 @@ const Dashboard = () => {
       icon: total_income,
     },
     {
-      title: "Service Provdiers",
-      number: 213,
+      title: "Service Provider",
+      number: serviceProvider?.data?.meta.total | 0,
       icon: service_providers,
     },
   ];
@@ -49,14 +71,19 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-black line-clamp-1">Awaiting Requests</h1>
+          <h1 className="text-2xl font-bold text-black line-clamp-1">
+            Awaiting Requests
+          </h1>
           <Link to="/awaiting-requests">
             <Button type="link" className="text-[var(--primary-color)]">
               Show All
             </Button>
           </Link>
         </div>
-        <AwaitingRequeststable pagination={false} />
+        <AwaitingRequeststable
+          pagination={false}
+          pendingRequest={pendingRequest}
+        />
       </PageContent>
     </PageLayout>
   );

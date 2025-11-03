@@ -1,45 +1,45 @@
-import React, { useState } from 'react'
-import { Button, Modal, Table } from 'antd'
-import UserImage from '../user/UserImage';
+import React, { useState } from "react";
+import { Button, Modal, Table } from "antd";
+import UserImage from "../user/UserImage";
 
 const columns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
+    title: "Name",
+    dataIndex: "name",
     render: (text, record) => (
       <UserImage user={{ name: text, avatar: record.avatar }} />
     ),
   },
   {
-    title: '',
-  dataIndex: 'address',
+    title: "Address",
+    dataIndex: "address",
   },
 ];
 
 const data = [
   {
-    key: '1',
-    name: 'John Brown',
-    avatar: 'https://avatar.iran.liara.run/public/13',
-    address: 'Dhaka, Banani(1.2 km away)',
+    key: "1",
+    name: "John Brown",
+    avatar: "https://avatar.iran.liara.run/public/13",
+    address: "Dhaka, Banani(1.2 km away)",
   },
   {
-    key: '2',
-    name: 'Jim Green',
-    avatar: 'https://avatar.iran.liara.run/public/13',
-    address: 'Dhaka, Banani(1.2 km away)',
+    key: "2",
+    name: "Jim Green",
+    avatar: "https://avatar.iran.liara.run/public/13",
+    address: "Dhaka, Banani(1.2 km away)",
   },
   {
-    key: '3',
-    name: 'Joe Black',
-    avatar: 'https://avatar.iran.liara.run/public/13',
-    address: 'Dhaka, Banani(1.2 km away)',
+    key: "3",
+    name: "Joe Black",
+    avatar: "https://avatar.iran.liara.run/public/13",
+    address: "Dhaka, Banani(1.2 km away)",
   },
   {
-    key: '4',
-    name: 'Disabled User',
-    avatar: 'https://avatar.iran.liara.run/public/13',
-    address: 'Dhaka, Banani(1.2 km away)',
+    key: "4",
+    name: "Disabled User",
+    avatar: "https://avatar.iran.liara.run/public/13",
+    address: "Dhaka, Banani(1.2 km away)",
   },
 ];
 
@@ -56,7 +56,7 @@ function MatchProviderList({ open = false, hide }) {
     console.log("Selected keys:", selectedKeys);
     // 👇 here you’ll get an array of selected keys
     // do whatever you want with it
-    alert("Match function called")
+    alert("Match function called");
   };
 
   return (
@@ -72,7 +72,7 @@ function MatchProviderList({ open = false, hide }) {
         </Button>,
         <Button
           key="match"
-          style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
+          style={{ backgroundColor: "var(--primary-color)", color: "#fff" }}
           onClick={handleMatch}
         >
           Match Provider
@@ -84,7 +84,7 @@ function MatchProviderList({ open = false, hide }) {
           All Providers
         </h1>
         <Table
-          rowSelection={{ type: 'checkbox', ...rowSelection }}
+          rowSelection={{ type: "checkbox", ...rowSelection }}
           columns={columns}
           dataSource={data}
           pagination={false}

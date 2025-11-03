@@ -22,7 +22,10 @@ export const baseApi = createApi({
     "PrivacyPolicy",
     "faqs",
     "Admin",
-    "SuperAdmin"
+    "SuperAdmin",
+    "user",
+    "serviceRequest",
+    "serviceProvider",
   ],
   endpoints: () => ({}),
 });

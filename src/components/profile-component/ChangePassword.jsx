@@ -1,9 +1,12 @@
 import React from "react";
 import { Button, Form, Input, Spin } from "antd";
+import { useChangePassMutation } from "../../RTK/services/profileApis/superAdminProfileApis";
+import toast from "react-hot-toast";
 // import { useChangePasswordMutation } from "../../src/Redux/Apis/auth/changePasswordApis";
 // import toast from "react-hot-toast";
 
 const ChangePassword = () => {
+  const [changePass, { isLoading }] = useChangePassMutation();
   const [form] = Form.useForm();
   // const [changePassword, { isLoading: isNewPassChange }] =
   //   useChangePasswordMutation();
@@ -13,11 +16,21 @@ const ChangePassword = () => {
     try {
       // await changePassword({ data: values }).unwrap();
       //   toast.success("Password changed successfully (dummy)");
+
+      await changePass(values).unwrap();
+      // console.log("✅ Password changed successfully:", response);
+      toast.success("Password changed successfully");
+      form.resetFields();
     } catch (error) {
       console.error("Failed to change password:", error);
+      toast.error("Failed to change password");
+
       //   toast.error("Failed to change Password.");
     }
   };
+  if (isLoading) {
+    return <div>....</div>;
+  }
 
   return (
     <Form

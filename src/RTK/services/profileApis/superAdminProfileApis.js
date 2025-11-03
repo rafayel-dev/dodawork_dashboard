@@ -17,10 +17,18 @@ const superAdminProfileApis = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["SuperAdmin"],
     }),
+    changePass: builder.mutation({
+      query: (data) => ({
+        url: "auth/change-password",
+        method: "PATCH", // or "POST" depending on your backend
+        body: data,
+      }),
+    }),
   }),
 });
 
 export const {
   useGetSuperAdminProfileQuery,
   useEditSuperAdminProfileMutation,
+  useChangePassMutation,
 } = superAdminProfileApis;

@@ -1,26 +1,81 @@
-import React, { useCallback, useState } from "react";
-import { Table, Modal, message } from "antd";
+import React, { useState, useEffect, useCallback } from "react";
+import { Table, Modal, Input } from "antd";
 import { userManageColumns } from "./userManageColumns";
-import SearchInput from "../../../components/common/SearchInput";
 import UserDeailsCard from "./UserDeailsCard";
-import { useGetAdminUsersQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import {
+  useBlockUserMutation,
+  useGetAdminUsersQuery,
+} from "../../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import toast from "react-hot-toast";
 
 function UserManageTable() {
   const [selectedUser, setSelectedUser] = useState(null);
-  const { data: users, isLoading: userDataLoading } = useGetAdminUsersQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [blockUser, { isLoading }] = useBlockUserMutation();
 
+  // ✅ Debounce search term (wait 500ms after typing)
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
+
+  // ✅ Fetch users based on debounced search term
+  const { data: users, isLoading: userDataLoading } =
+    useGetAdminUsersQuery(debouncedSearch);
+  // ✅ Handlers
+  const handleSearchChange = (e) => {
+    const value = e.target.value.trim();
+    setSearchTerm(value);
+    console.log("🔍 Searching for:", value);
+  };
 
   const handleView = useCallback((record) => {
     setSelectedUser(record);
-  }, [selectedUser]);
+  }, []);
 
-  const handleBlock = useCallback((record) => {
-    alert(`${record?.user_profile?.name} blocked successfully`);
-  }, [selectedUser]);
+  const handleBlock = useCallback(
+    async (record) => {
+      console.log((!record?.authId?.isBlocked).toString());
+      const body = {
+        authId: record?.authId._id,
+        isBlocked: !record?.authId?.isBlocked ? "true" : "false", // toggle current status
+      };
+
+      try {
+        const res = await blockUser(body).unwrap();
+        toast.success(
+          `User ${
+            record?.authId?.isBlocked ? "unblocked" : "blocked"
+          } successfully`
+        );
+        console.log(res);
+
+        // Optionally refresh the user list if using RTK query
+        // refetch();
+      } catch (error) {
+        console.error("❌ Block/Unblock failed:", error);
+        toast.error("Failed to update user status");
+      }
+    },
+    [blockUser]
+  );
 
   return (
     <div>
-      <SearchInput className="mb-4" placeholder="Search by Email" />
+      {/* Search Field */}
+      <Input.Search
+        className="mb-4"
+        placeholder="Search by name or email"
+        onChange={handleSearchChange}
+        value={searchTerm}
+        allowClear
+        style={{ maxWidth: 300 }}
+      />
+
+      {/* User Table */}
       <Table
         columns={userManageColumns(handleView, handleBlock)}
         dataSource={users?.data?.users || []}
@@ -31,6 +86,8 @@ function UserManageTable() {
         bordered
         rowKey="_id"
       />
+
+      {/* User Details Modal */}
       <Modal
         open={!!selectedUser}
         footer={null}

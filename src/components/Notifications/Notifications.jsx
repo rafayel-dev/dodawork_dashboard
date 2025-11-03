@@ -1,33 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FiBell, FiCheck, FiAlertCircle, FiInfo } from 'react-icons/fi';
+import React, { useState, useRef, useEffect } from "react";
+import { FiBell, FiCheck, FiAlertCircle, FiInfo } from "react-icons/fi";
+import { useGetAllNotificationsQuery } from "../../RTK/services/dashboard/authorised-teams/notification/notificationApi";
 
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: notifications2, isLoading } = useGetAllNotificationsQuery();
+  console.log(notifications2);
+
   const [notifications, setNotifications] = useState([
     {
       id: 1,
-      title: 'New update available',
-      message: 'A new version of the dashboard is available.',
-      type: 'info',
+      title: "New update available",
+      message: "A new version of the dashboard is available.",
+      type: "info",
       read: false,
-      time: '2 minutes ago'
+      time: "2 minutes ago",
     },
     {
       id: 2,
-      title: 'New user registered',
-      message: 'John Doe has created a new account.',
-      type: 'success',
+      title: "New user registered",
+      message: "John Doe has created a new account.",
+      type: "success",
       read: false,
-      time: '1 hour ago'
+      time: "1 hour ago",
     },
     {
       id: 3,
-      title: 'Server maintenance',
-      message: 'Scheduled maintenance this weekend.',
-      type: 'warning',
+      title: "Server maintenance",
+      message: "Scheduled maintenance this weekend.",
+      type: "warning",
       read: true,
-      time: '1 day ago'
-    }
+      time: "1 day ago",
+    },
   ]);
 
   const dropdownRef = useRef(null);
@@ -36,15 +40,15 @@ const Notifications = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        if (!event.target.closest('.notification-trigger')) {
+        if (!event.target.closest(".notification-trigger")) {
           setIsOpen(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -57,26 +61,28 @@ const Notifications = () => {
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({
-      ...notif,
-      read: true
-    })));
+    setNotifications(
+      notifications.map((notif) => ({
+        ...notif,
+        read: true,
+      }))
+    );
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'success':
+      case "success":
         return <FiCheck className="h-5 w-5 text-green-500" />;
-      case 'warning':
+      case "warning":
         return <FiAlertCircle className="h-5 w-5 text-yellow-500" />;
-      case 'error':
+      case "error":
         return <FiAlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return <FiInfo className="h-5 w-5 text-blue-500" />;
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -96,7 +102,7 @@ const Notifications = () => {
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden z-50 border border-gray-200">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-medium text-gray-900">Notifications</h3>
-            {notifications.some(n => !n.read) && (
+            {notifications.some((n) => !n.read) && (
               <button
                 onClick={markAllAsRead}
                 className="text-sm text-[var(--secondary-color)] hover:text-yellow-600"
@@ -105,14 +111,16 @@ const Notifications = () => {
               </button>
             )}
           </div>
-          
+
           <div className="max-h-96 overflow-y-auto">
             {notifications.length > 0 ? (
               <ul className="divide-y divide-gray-100">
                 {notifications.map((notification) => (
-                  <li 
+                  <li
                     key={notification.id}
-                    className={`p-4 hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
+                    className={`p-4 hover:bg-gray-50 ${
+                      !notification.read ? "bg-blue-50" : ""
+                    }`}
                   >
                     <div className="flex items-start">
                       <div className="flex-shrink-0 mt-0.5">
@@ -139,7 +147,7 @@ const Notifications = () => {
               </div>
             )}
           </div>
-          
+
           {/* <div className="p-3 border-t border-gray-200 text-center">
             <a
               href="#"
