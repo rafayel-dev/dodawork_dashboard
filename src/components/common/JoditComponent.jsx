@@ -1,5 +1,6 @@
 import React, { memo, useRef, useEffect, useState, useMemo } from 'react';
 import JoditEditor from 'jodit-react';
+import { PiPlaceholder } from 'react-icons/pi';
 
 const JoditComponent = ({ content, setContent }) => {
   const editor = useRef(null);
@@ -13,6 +14,7 @@ const JoditComponent = ({ content, setContent }) => {
   const config = useMemo(
     () => ({
       readonly: false,
+      placeholder: '',
       toolbarSticky: false,
       minHeight: 500,
       buttons: [

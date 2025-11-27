@@ -38,6 +38,11 @@ export const dateFormate = (date) => {
   return createdAt.toLocaleDateString();
 };
 
+export const formatTime = (date) => { // New function
+  const d = new Date(date);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 export const perfectImageReturn = (image, fallback = "https://placehold.co/400") => {
   if (!image) return fallback;
 

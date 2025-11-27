@@ -1,18 +1,24 @@
 import { Button, Form, Input, message } from 'antd';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForgotPasswordMutation } from '../../RTK/services/auth/authApi';
+import toast from 'react-hot-toast';
 
 const ForgotPassword = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const navigate = useNavigate();
 
-  const handleSubmit = (values) => {
-    console.log(values);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      message.success("Otp sent successfully");
-      window.location.href = "/verify-otp";
-    }, 1500);
+  const handleSubmit = async (values) => {
+    try {
+      await forgotPassword({ email: values.email }).unwrap();
+      toast.success("OTP sent successfully to your email!");
+      setTimeout(() => {
+      navigate("/verify-otp", { state: { email: values.email } });
+      }, 1500);
+    } catch (err) {
+      toast.error(err.data?.message || "Failed to send OTP. Please check the email and try again.");
+      console.error("Forgot Password failed:", err);
+    }
   };
 
   return (
@@ -32,6 +38,7 @@ const ForgotPassword = () => {
             <Input
               size="large"
               name="email"
+              type="email"
               placeholder="Email address"
             />
           </Form.Item>

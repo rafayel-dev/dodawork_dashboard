@@ -3,17 +3,23 @@ import Notifications from "../Notifications/Notifications";
 import { FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
-import { handleLogout } from "./logOutHandler";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../RTK/slices/authSlice";
 
 
 function Header({ user, toggleSidebar }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const payload = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    window.location.reload();
   };
 
   return (
@@ -32,7 +38,7 @@ function Header({ user, toggleSidebar }) {
           <div className="relative" ref={profileRef}>
             <button
               onClick={toggleProfile}
-              className="flex items-center space-x-2 focus:outline-none profile-image-trigger"
+              className="flex items-center space-x-2 focus:outline-none profile-image-trigger cursor-pointer"
             >
               <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                 <img
@@ -60,7 +66,7 @@ function Header({ user, toggleSidebar }) {
                 </div>
                 <Link
                   to="/profile"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() => setIsProfileOpen(false)}
                 >
                   <FiUser className="mr-3 h-5 w-5 text-gray-400" />
@@ -69,7 +75,7 @@ function Header({ user, toggleSidebar }) {
                 <div className="border-t border-gray-100"></div>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center cursor-pointer"
                 >
                   <FiLogOut className="mr-3 h-5 w-5 text-red-400" />
                   <span>Sign out</span>

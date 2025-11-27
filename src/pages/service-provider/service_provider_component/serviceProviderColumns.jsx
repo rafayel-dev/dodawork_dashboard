@@ -14,14 +14,14 @@ export const serviceProviderColumns = (onView, onBlockToggle) => [
     ),
   },
   {
-    title: "Contact Number",
-    dataIndex: "phone",
-    key: "phone",
-  },
-  {
     title: "Email",
     dataIndex: "email",
     key: "email",
+  },
+    {
+    title: "Company Name",
+    dataIndex: "company_name",
+    key: "company_name",
   },
   {
     title: "Website Link",
@@ -70,7 +70,7 @@ export const serviceProviderColumns = (onView, onBlockToggle) => [
             }
           }}
           onCancel={() => {
-            if (window) window.open("/chat", "_parent");
+            if (window) window.open(`/chat?providerId=${record.request_id}`, "_parent");
           }}
         >
           <Button shape="circle" icon={<MdChat />} />

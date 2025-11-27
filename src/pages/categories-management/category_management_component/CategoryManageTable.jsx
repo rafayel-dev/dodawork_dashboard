@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Form, Table } from "antd";
+import { Form, Table, Pagination } from "antd";
 import { categoryManageColumns } from "./categoryManageColumns";
 import CustomButton from "../../../components/common/CustomButton";
 import CategoryForm from "./CategoryForm";
@@ -19,8 +19,13 @@ function CategoryManageTable() {
   const [modalVisible, setModalVisible] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [record, setRecord] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data: categories, isLoading, isFetching } = useGetAllCategoriesQuery();
+  const { data: categories, isLoading, isFetching } = useGetAllCategoriesQuery({
+    page: currentPage,
+    limit: pageSize,
+  });
   const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
   const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
@@ -79,6 +84,11 @@ function CategoryManageTable() {
     [createCategory, updateCategory, isUpdate, record, form]
   );
 
+  const handlePaginationChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
+
   return (
     <div>
       <CustomButton onClick={handleAddCategory} title="Add Category" icon="plus" />
@@ -87,7 +97,14 @@ function CategoryManageTable() {
         loading={isLoading || isFetching}
         columns={categoryManageColumns(handleEditCategory, handleDeleteCategory, handleNavigate)}
         dataSource={categories?.data?.categories || []}
-        pagination={false}
+        pagination={{
+          current: categories?.data?.meta?.page || 1,
+          pageSize: categories?.data?.meta?.limit || 10,
+          total: categories?.data?.meta?.total || 0,
+          onChange: handlePaginationChange,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50', '100'],
+        }}
         scroll={{ x: "max-content" }}
         size="large"
         bordered

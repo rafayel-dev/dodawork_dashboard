@@ -1,18 +1,39 @@
 import { Button, Form, Input } from 'antd';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useResetPasswordMutation } from '../../RTK/services/auth/authApi';
+import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  const handleSubmit = (values) => {
-    console.log(values);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+  const email = location.state?.email;
+
+  const handleSubmit = async (values) => {
+    if (!email) {
+      toast.error("Email not found. Please start the password reset process again.");
+      navigate('/forgot-password');
+      return;
+    }
+
+    const payload = {
+      email,
+      newPassword: values.password,
+      confirmPassword: values.confirmPassword,
+    };
+
+    try {
+      await resetPassword(payload).unwrap();
+      toast.success("Password reset successfully! You can now log in with your new password.");
+      setTimeout(() => {
       navigate('/login');
-    }, 1500);
+      }, 1500);
+    } catch (err) {
+      toast.error(err.data?.message || "Failed to reset password. Please try again.");
+      console.error("Password reset failed:", err);
+    }
   };
 
   return (

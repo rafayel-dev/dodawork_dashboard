@@ -1,23 +1,33 @@
 import { Button, Form, Input } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useForgetPassOtpVerifyMutation } from '../../RTK/services/auth/authApi';
+import toast from 'react-hot-toast';
 
 const VerifyOTP = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get email from location state or use a default
+  const [forgetPassOtpVerify, { isLoading }] = useForgetPassOtpVerifyMutation();
+  
   const email = location.state?.email || 'your.email@example.com';
 
-  const handleSubmit = (values) => {
-    console.log(values);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/reset-password", { state: { email } });
-    }, 1500);
-  };
+    const handleSubmit = async (values) => {
+
+      try {
+        await forgetPassOtpVerify({ email, code: values.otp }).unwrap();
+        toast.success("OTP verified successfully!");
+        setTimeout(() => {
+        navigate("/reset-password", { state: { email } });
+        }, 1500);
+
+      } catch (err) {
+        toast.error(err.data?.message || "Invalid or expired OTP. Please try again.");
+        console.error("OTP Verification failed:", err);
+
+      }
+
+    };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -27,7 +37,7 @@ const VerifyOTP = () => {
             Verify your email
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            We've sent a 5-digit verification code to {email}
+            We've sent a 6-digit verification code to {email}
           </p>
         </div>
 
@@ -38,7 +48,7 @@ const VerifyOTP = () => {
         >
           <div className='flex items-center justify-center'>
             <Form.Item name="otp" rules={[{ required: true, message: 'Please enter the OTP' }]}>
-              <Input.OTP length={5} size="large" placeholder="Enter OTP" />
+              <Input.OTP length={6} size="large" placeholder="Enter OTP" />
             </Form.Item>
           </div>
           <Button

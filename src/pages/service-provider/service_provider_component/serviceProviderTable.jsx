@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { Table, message } from "antd";
 import SearchInput from "../../../components/common/SearchInput";
 import { serviceProviderColumns } from "./serviceProviderColumns";
@@ -11,24 +11,38 @@ import {
 } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
 
 function ServiceProviderTable() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const {
     data: serviceProvider,
     isLoading,
     refetch,
-  } = useGetAllServiceProvidersQuery();
+  } = useGetAllServiceProvidersQuery({ page: currentPage, limit: pageSize, search: debouncedSearch, });
   const [verifyProvider, { isLoading: isBlocking }] =
     useVerifyServiceProviderMutation();
 
   const [open, setOpen] = useState(false);
-  const [record, setRecord] = useState(null);
+  const [selectedProviderId, setSelectedProviderId] = useState(null);
 
-  const hide = useCallback(() => setOpen(false), []);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
+
+  const hide = useCallback(() => {
+    setOpen(false);
+    setSelectedProviderId(null);
+  }, []);
 
   const BASE_URL = `${baseUrl}/`;
-  console.log(serviceProvider);
   const providers = useMemo(
     () =>
-      serviceProvider?.data.providers?.filter((item) => item.isVerified) || [], // only keep verified providers
+      serviceProvider?.data.providers?.filter((item) => item.isVerified === true && item.isRejected === false) || [],
     [serviceProvider]
   );
 
@@ -39,40 +53,40 @@ function ServiceProviderTable() {
         key: item._id || Math.random().toString(),
         name: item.authId?.name || "Unknown",
         email: item.authId?.email || "N/A",
-        phone: item.authId?.phone || "N/A",
+        phone: item.authId?.phoneNumber || "N/A",
         status: item.isRejected
           ? "Rejected"
           : item.isVerified
-          ? "Verified"
-          : "Pending",
+            ? "Verified"
+            : "Pending",
         company_name: item.companyName || "N/A",
         company_address: item.serviceLocation || "N/A",
-        category: item.serviceCategories?.[0]?.name || "N/A",
-        sub_category: item.serviceCategories?.[1]?.name || "N/A",
-        working_hours: item.workingHours?.[0]
-          ? `${item.workingHours[0].startTime} - ${item.workingHours[0].endTime}`
+        category: item.serviceCategories?.length
+          ? item.serviceCategories.map((cat) => cat.name).join(" , ")
           : "N/A",
-        weekend: item.workingHours?.[0]?.day || "N/A",
+        working_hours:
+          item.workingHours
+            ?.map((d) => `${d.day}: ${d.startTime}-${d.endTime}`)
+            .join("; ") || "N/A",
         contact_person: item.contactPerson || "N/A",
-        avatar: "https://avatar.iran.liara.run/public/13",
+        avatar: item.profile_image
+          ? `${BASE_URL}${item.profile_image.replace(/\\/g, "/")}`
+          : "https://avatar.iran.liara.run/public/13",
         website_link: item.website || "N/A",
-        certificate:
-          item.attachments?.[0] && !item.attachments[0].endsWith(".mp4")
-            ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
-            : "https://via.placeholder.com/150",
-        license:
-          item.attachments?.[1] && !item.attachments[1].endsWith(".mp4")
-            ? `${BASE_URL}${item.attachments[1].replace(/\\/g, "/")}`
-            : "https://via.placeholder.com/150",
       })),
     [providers, BASE_URL]
   );
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value.trim();
+    setSearchTerm(value);
+    console.log("🔍 Searching for:", value);
+  };
+
   const handleView = useCallback((record) => {
-    setRecord(record);
+    setSelectedProviderId(record.request_id);
     setOpen(true);
   }, []);
-  console.log(providers);
   const handleBlockToggle = useCallback(
     async (record) => {
       const isCurrentlyRejected = record.status === "Rejected";
@@ -84,11 +98,10 @@ function ServiceProviderTable() {
       try {
         await verifyProvider(bodyData).unwrap();
         message.success(
-          `${record.name} ${
-            !isCurrentlyRejected ? "blocked" : "activated"
+          `${record.name} ${!isCurrentlyRejected ? "blocked" : "activated"
           } successfully`
         );
-        refetch(); // refresh the table
+        refetch();
       } catch (error) {
         message.error("Failed to update provider status");
         console.error("❌ Toggle failed:", error);
@@ -101,17 +114,28 @@ function ServiceProviderTable() {
 
   return (
     <div>
-      <SearchInput className="mb-4" placeholder="Search by Email" />
+      <SearchInput className="mb-4" placeholder="Search by Email" onChange={handleSearchChange} value={searchTerm} />
       <Table
         columns={serviceProviderColumns(handleView, handleBlockToggle)}
         dataSource={data}
-        pagination={false}
+        pagination={{
+          current: serviceProvider?.data?.meta?.page || currentPage,
+          pageSize: serviceProvider?.data?.meta?.limit || pageSize,
+          total: serviceProvider?.data?.meta?.total || 0,
+          onChange: (page, newPageSize) => {
+            setCurrentPage(page);
+            setPageSize(newPageSize);
+          },
+          showSizeChanger: true,
+          showLessItems: true,
+          pageSizeOptions: ['10', '20', '50', '100'],
+        }}
         scroll={{ x: "max-content" }}
         size="large"
         bordered
         rowKey="request_id"
       />
-      <ServiceProviderDetails open={open} hide={hide} record={record} />
+      <ServiceProviderDetails open={open} hide={hide} providerId={selectedProviderId} />
     </div>
   );
 }

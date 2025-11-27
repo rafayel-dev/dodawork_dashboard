@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiLogOut, FiX, FiSettings } from 'react-icons/fi';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../RTK/slices/authSlice';
 
 const ProfileSidebar = ({ isOpen, onClose, user }) => {
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -27,8 +30,7 @@ const ProfileSidebar = ({ isOpen, onClose, user }) => {
   }, [isOpen, onClose]);
 
   const handleLogout = () => {
-    // Handle logout logic here
-    console.log('User logged out');
+    dispatch(logout());
     navigate('/login');
   };
 

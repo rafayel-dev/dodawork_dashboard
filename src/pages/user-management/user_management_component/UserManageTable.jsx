@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Table, Modal, Input } from "antd";
+import { Table, Modal, Input, Pagination } from "antd";
 import { userManageColumns } from "./userManageColumns";
 import UserDeailsCard from "./UserDeailsCard";
 import {
@@ -12,9 +12,10 @@ function UserManageTable() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [blockUser, { isLoading }] = useBlockUserMutation();
 
-  // ✅ Debounce search term (wait 500ms after typing)
   useEffect(() => {
     const delay = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -22,9 +23,12 @@ function UserManageTable() {
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-  // ✅ Fetch users based on debounced search term
-  const { data: users, isLoading: userDataLoading } =
-    useGetAdminUsersQuery(debouncedSearch);
+  const { data: users, isLoading: userDataLoading } = useGetAdminUsersQuery({
+    searchTerm: debouncedSearch,
+    page: currentPage,
+    limit: pageSize,
+  });
+
   // ✅ Handlers
   const handleSearchChange = (e) => {
     const value = e.target.value.trim();
@@ -63,6 +67,11 @@ function UserManageTable() {
     [blockUser]
   );
 
+  const handlePaginationChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
+
   return (
     <div>
       {/* Search Field */}
@@ -80,7 +89,14 @@ function UserManageTable() {
         columns={userManageColumns(handleView, handleBlock)}
         dataSource={users?.data?.users || []}
         loading={userDataLoading}
-        pagination={false}
+        pagination={{
+          current: users?.data?.meta?.page || 1,
+          pageSize: users?.data?.meta?.limit || 10,
+          total: users?.data?.meta?.total || 0,
+          onChange: handlePaginationChange,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50', '100'],
+        }}
         scroll={{ x: "max-content" }}
         size="large"
         bordered

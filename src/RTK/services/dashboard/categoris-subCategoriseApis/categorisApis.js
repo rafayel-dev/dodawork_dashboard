@@ -3,10 +3,15 @@ import { baseApi } from "../../baseApi";
 const categorisApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCategories: builder.query({
-      query: () => ({
-        url: "/category/get-all",
-        method: "GET",
-      }),
+      query: ({ page = 1, limit = 10 }) => {
+        const params = new URLSearchParams();
+        params.append("page", page);
+        params.append("limit", limit);
+        return {
+          url: `/category/get-all?${params.toString()}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Categories"],
     }),
     createCategory: builder.mutation({

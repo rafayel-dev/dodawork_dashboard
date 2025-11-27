@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { PageLayout, PageContent } from "../../components/PageLayout";
 import StatusCard from "./components/StatusCard";
 import user from "../../assets/user.svg";
@@ -7,23 +7,26 @@ import total_income from "../../assets/income.svg";
 import service_providers from "../../assets/service_provider.svg";
 import RequestsTrend from "../../components/charts/RequestsTrend";
 import CompletionRate from "../../components/charts/CompletionRate";
-import AwaitingRequeststable from "../awaiting-requests/request_component/AwaitingRequeststable";
-import { Button } from "antd";
-import { Link } from "react-router-dom";
 import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
 import Loading from "../../components/common/Loading";
 import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
 import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 
 const Dashboard = () => {
-  const { data: userData, isLoading } = useGetAdminUsersQuery();
+  const { data: userData, isLoading, isError, error } = useGetAdminUsersQuery({});
   const { data: serviceRequestData, isLoading: isLoading2 } =
     useGetAllServiceRequestQuery();
   const { data: serviceProvider, isLoading: isLoading3 } =
     useGetAllServiceProvidersQuery();
 
+  useEffect(() => {
+    if(isError){
+      console.error("Error fetching admin users:", error);
+    }
+  }, [isError, error]);
+
   if (isLoading || isLoading2 || isLoading3) {
-    <Loading />;
+    return <Loading />;
   }
 
   let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
@@ -31,12 +34,10 @@ const Dashboard = () => {
       if (item.status === "PENDING") return item;
     }
   );
-  // console.log(pendingRequest);
-
+  
   const data = [
     {
       title: "Total Users",
-
       number: userData?.data.meta.total | 0,
       icon: user,
     },
@@ -70,7 +71,7 @@ const Dashboard = () => {
             <CompletionRate />
           </div>
         </div>
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-black line-clamp-1">
             Awaiting Requests
           </h1>
@@ -83,7 +84,7 @@ const Dashboard = () => {
         <AwaitingRequeststable
           pagination={false}
           pendingRequest={pendingRequest}
-        />
+        /> */}
       </PageContent>
     </PageLayout>
   );

@@ -15,33 +15,29 @@ import {
 } from "react-icons/fa";
 import { RiAdminFill } from "react-icons/ri";
 import { MdHomeRepairService } from "react-icons/md";
+import { FaMessage, FaRegMessage } from "react-icons/fa6";
 
 export const menuItems = [
     { path: "/", name: "Dashboard", icon: <FiHome className="h-5 w-5" /> },
-    {
-        path: "/awaiting-requests",
-        name: "Awaiting Requests",
-        icon: <FaStopwatch className="h-5 w-5" />,
-    },
+    // {
+    //     path: "/awaiting-requests",
+    //     name: "Awaiting Requests",
+    //     icon: <FaStopwatch className="h-5 w-5" />,
+    // },
     {
         path: "/matched-services",
         name: "All Services",
         icon: <MdHomeRepairService className="h-5 w-5" />,
     },
     {
-        path: "/service-provider",
-        name: "Service Provider",
-        icon: <FaUserCog className="h-5 w-5" />,
-    },
-    {
         path: "/sign-up-user-request",
-        name: "Sign Up Request",
-        icon: <FaUserSolid className="h-5 w-5" />,
+        name: "Provider Requests",
+        icon: <FaStopwatch className="h-5 w-5" />,
     },
     {
-        path: "/user-management",
-        name: "User Management",
-        icon: <FiUsers className="h-5 w-5" />,
+        path: "/service-provider",
+        name: "Service Providers",
+        icon: <FaUserCog className="h-5 w-5" />,
     },
     {
         path: "/categories-management",
@@ -49,9 +45,14 @@ export const menuItems = [
         icon: <FiList className="h-5 w-5" />,
     },
     {
-        path: "/admin",
-        name: "Admin Management",
-        icon: <RiAdminFill className="h-5 w-5" />,
+        path: "/user-management",
+        name: "User Management",
+        icon: <FiUsers className="h-5 w-5" />,
+    },
+    {
+        path: "/chat",
+        name: "Chat Support",
+        icon: <FaRegMessage className="h-5 w-5" />,
     },
     {
         path: "/faq",
@@ -77,30 +78,25 @@ export const menuItems = [
 
 export const superAdminMenuItems = [
     { path: "/", name: "Dashboard", icon: <FiHome className="h-5 w-5" /> },
-    {
-        path: "/awaiting-requests",
-        name: "Awaiting Requests",
-        icon: <FaStopwatch className="h-5 w-5" />,
-    },
+    // {
+    //     path: "/awaiting-requests",
+    //     name: "Awaiting Requests",
+    //     icon: <FaStopwatch className="h-5 w-5" />,
+    // },
     {
         path: "/matched-services",
         name: "All Services",
         icon: <MdHomeRepairService className="h-5 w-5" />,
     },
     {
-        path: "/service-provider",
-        name: "Service Provider",
-        icon: <FaUserCog className="h-5 w-5" />,
-    },
-    {
         path: "/sign-up-user-request",
-        name: "Sign Up Request",
-        icon: <FaUserSolid className="h-5 w-5" />,
+        name: "Provider Requests",
+        icon: <FaStopwatch className="h-5 w-5" />,
     },
     {
-        path: "/user-management",
-        name: "User Management",
-        icon: <FiUsers className="h-5 w-5" />,
+        path: "/service-provider",
+        name: "Service Providers",
+        icon: <FaUserCog className="h-5 w-5" />,
     },
     {
         path: "/categories-management",
@@ -108,9 +104,19 @@ export const superAdminMenuItems = [
         icon: <FiList className="h-5 w-5" />,
     },
     {
+        path: "/user-management",
+        name: "User Management",
+        icon: <FiUsers className="h-5 w-5" />,
+    },
+    {
         path: "/admin",
         name: "Admin Management",
         icon: <RiAdminFill className="h-5 w-5" />,
+    },
+    {
+        path: "/chat",
+        name: "Chat Support",
+        icon: <FaRegMessage className="h-5 w-5" />,
     },
     {
         path: "/faq",

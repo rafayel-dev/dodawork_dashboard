@@ -4,28 +4,47 @@ import ProfileSidebar from "../ProfileSidebar/ProfileSidebar";
 import MainSidebar from "./MainSidebar";
 import Header from "./Header";
 import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis";
+import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/authorised-teams/admins/adminApis"; // Import admin profile hook
 import { imageUrl } from "../../utils/optimizationFunction";
+import { useSelector } from "react-redux"; // Import useSelector
 
 const Layout = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
-  const { data: superAdminProfile, isLoading: superAdminProfileLoading } = useGetSuperAdminProfileQuery()
+  
+  // Get role from Redux to conditionally fetch data
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const role = currentUser?.authId?.role;
+
+  // Conditionally fetch profile data
+  const { data: superAdminProfile, isLoading: superAdminProfileLoading } = useGetSuperAdminProfileQuery({}, {
+    skip: role !== 'SUPER_ADMIN'
+  });
+  const { data: adminProfile, isLoading: adminProfileLoading } = useGetProfileAdminQuery({}, {
+    skip: role !== 'ADMIN'
+  });
+
   const [user, setUser] = useState({
     name: "",
     email: "",
     avatar: "",
     role: "",
   });
+
   useEffect(() => {
-    if (superAdminProfile && !superAdminProfileLoading) {
+    // Determine which profile data and loading state to use
+    const profileData = superAdminProfile?.data || adminProfile?.data;
+    const isLoading = superAdminProfileLoading || adminProfileLoading;
+
+    if (profileData && !isLoading) {
       setUser({
-        name: superAdminProfile?.data?.name || "",
-        email: superAdminProfile?.data?.email || "",
-        avatar: imageUrl(superAdminProfile?.data?.profile_image) || "",
-        role: superAdminProfile?.data?.authId?.role || "",
+        name: profileData?.name || "",
+        email: profileData?.email || "",
+        avatar: imageUrl(profileData?.profile_image) || "",
+        role: profileData?.authId?.role || role || "", // Use role from profile data or redux state
       });
     }
-  }, [superAdminProfile, superAdminProfileLoading]);
+  }, [superAdminProfile, adminProfile, superAdminProfileLoading, adminProfileLoading, role]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -53,7 +72,7 @@ const Layout = () => {
 
       {isSidebarOpen && (
         <div
-          className="fixed inset-0  bg-opacity-50 lg:hidden z-20"
+          className="fixed inset-0 bg-opacity-50 lg:hidden z-20"
           onClick={toggleSidebar}
         ></div>
       )}

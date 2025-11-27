@@ -42,7 +42,7 @@ function MainSidebar({ toggleSidebar, isSidebarOpen }) {
               <NavLink
                 to={item.path}
                 className={cn(
-                  "flex items-center px-4 py-3 rounded-md mx-2 transition-colors",
+                  "flex items-center px-4 py-3 rounded-md mx-2 transition-colors hover:bg-amber-400",
                   {
                     "bg-[var(--secondary-color)]": isActive(item.path),
                   }

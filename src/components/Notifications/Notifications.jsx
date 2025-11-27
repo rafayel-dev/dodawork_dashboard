@@ -5,7 +5,6 @@ import { useGetAllNotificationsQuery } from "../../RTK/services/dashboard/author
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: notifications2, isLoading } = useGetAllNotificationsQuery();
-  console.log(notifications2);
 
   const [notifications, setNotifications] = useState([
     {
@@ -88,7 +87,7 @@ const Notifications = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleNotifications}
-        className="p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--secondary-color)] relative notification-trigger"
+        className="p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--secondary-color)] relative notification-trigger cursor-pointer"
       >
         <FiBell className="h-6 w-6" />
         {unreadCount > 0 && (

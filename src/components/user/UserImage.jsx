@@ -8,7 +8,7 @@ function UserImage({ user, className }) {
       {user?.avatar && <img
         src={imageUrl(user?.avatar)}
         alt={user?.name}
-        className={cn("w-10 border border-gray-300 object-contain h-10 rounded-full", className)}
+        className={cn("w-10 border border-gray-300 h-10 object-cover rounded-full", className)}
       />}
       <div className="flex flex-col">
         <h1>{user?.name}</h1>

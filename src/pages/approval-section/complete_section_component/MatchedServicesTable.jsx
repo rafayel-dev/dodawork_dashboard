@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Table, Modal, Tabs, ConfigProvider } from "antd";
+import { Table, Modal, Select } from "antd"; // Import Select
 import { matchedServicesColumns } from "./matchedServicesColumns";
 import MatchedServicesDetailsCard from "./MatchedServicesDetailsCard";
-import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 import Loading from "../../../components/common/Loading";
 import { baseUrl } from "../../../utils/optimizationFunction";
@@ -11,26 +10,13 @@ function MatchedServicesTable() {
   const BASE_URL = `${baseUrl}/`;
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
-  const [activeTab, setActiveTab] = useState("Approved");
-  const { data: serviceRequestData, isLoading } =
-    useGetAllServiceRequestQuery();
-  let serviceRequests = serviceRequestData?.data?.serviceRequests;
-  if (isLoading) {
-    <Loading />;
-  }
-  console.log(serviceRequests, "match service");
-  // ✅ Filter approved and rejected requests
-  const approveRequest =
-    serviceRequests?.filter((item) => item.status === "APPROVED") || [];
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
-  const rejectRequest =
-    serviceRequests?.filter((item) => item.status === "REJECTED") || [];
+  const { data: serviceRequestData, isLoading } = useGetAllServiceRequestQuery(statusFilter);
 
-  // ✅ Merge both into single array for the tabs
-  const allRequests = [...approveRequest, ...rejectRequest];
+  const serviceRequests = serviceRequestData?.data?.serviceRequests || [];
 
-  // ✅ Dynamic mapping to UI table format
-  const data = allRequests.map((item) => ({
+  const data = useMemo(() => serviceRequests.map((item) => ({
     request_id: item.requestId || item._id || "N/A",
     key: item._id || Math.random().toString(),
     name: item.customerId?.name || "Unknown",
@@ -42,7 +28,7 @@ function MatchedServicesTable() {
       : "N/A",
     time: item.startTime || "N/A",
     priority: item.priority || "Normal",
-    status: item.status === "APPROVED" ? "Approved" : "Rejected",
+    status: item.status, // Use raw status
     avatar: "https://avatar.iran.liara.run/public/13",
     action: "View",
     video: Array.isArray(item.attachments)
@@ -55,21 +41,28 @@ function MatchedServicesTable() {
       Array.isArray(item.attachments) && item.attachments.length > 0
         ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
         : "https://via.placeholder.com/150",
-  }));
+  })), [serviceRequests, BASE_URL]);
 
-  // ✅ Filter data for active tab
   const filteredData = useMemo(
-    () => data.filter((item) => item.status === activeTab),
-    [data, activeTab]
+    () => {
+      if (statusFilter === "ALL") {
+        return data;
+      }
+      return data.filter((item) => item.status === statusFilter);
+    },
+    [data, statusFilter]
   );
 
-  // ✅ Tab configuration
-  const items = [
-    { key: "Approved", label: "Approved" },
-    { key: "Rejected", label: "Rejected" },
+  const filterOptions = [
+    { value: 'ALL', label: 'All Statuses' },
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'PROCESSING', label: 'Processing' },
+    { value: 'ONGOING', label: 'Ongoing' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
   ];
 
-  // ✅ Handlers
+  // Handlers
   const handleView = useCallback((record) => setSelectedRequest(record), []);
   const handleCancel = useCallback((record) => {
     setCancel(true);
@@ -79,25 +72,21 @@ function MatchedServicesTable() {
     }, 2000);
   }, []);
 
-  // ✅ Render
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  // Render
   return (
     <div>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: "#111",
-            colorBgContainer: "#ffa337",
-          },
-        }}
-      >
-        <Tabs
-          type="card"
-          size="middle"
-          defaultActiveKey="Approved"
-          items={items}
-          onChange={(key) => setActiveTab(key)}
+      <div style={{ marginBottom: 16 }}>
+        <Select
+          defaultValue="ALL"
+          style={{ width: 200 }}
+          onChange={(value) => setStatusFilter(value)}
+          options={filterOptions}
         />
-      </ConfigProvider>
+      </div>
 
       <Table
         columns={matchedServicesColumns(handleView)}

@@ -15,8 +15,6 @@ const Profile = () => {
   const { user } = useSelector((state) => state.auth);
   const { data: superAdminProfile } = useGetSuperAdminProfileQuery(undefined, { skip: user?.authId?.role !== "SUPER_ADMIN" })
   const { data: adminProfile } = useGetProfileAdminQuery(undefined, { skip: user?.authId?.role !== "ADMIN" })
-  console.log(adminProfile)
-  console.log(superAdminProfile)
 
 
   const [image, setImage] = useState(null);

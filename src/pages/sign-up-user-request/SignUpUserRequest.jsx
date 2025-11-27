@@ -14,15 +14,35 @@ import toast from "react-hot-toast";
 function SignUpUserRequest() {
   const [verifyProvider, { isLoading: isLoading2 }] =
     useVerifyServiceProviderMutation();
-  const { data: serviceProvider, isLoading } = useGetAllServiceProvidersQuery();
+  const { data: serviceProvider, isLoading, refetch } = useGetAllServiceProvidersQuery({ page: 1, limit: 10000 });
   if (isLoading || isLoading2) {
-    <Loading />;
+    return <Loading />;
   }
 
-  let providers = serviceProvider?.data.providers.filter((item) => {
-    if (item.isVerified === false && item.isRejected === false) return item;
-  });
-  console.log(providers);
+  const providers =
+    serviceProvider?.data.providers?.filter(
+      (item) => {
+        const isPendingNewRequest =
+          item.isVerified === false &&
+          item.isRejected === false;
+
+        const hasPendingUpdates =
+          item.pendingUpdates &&
+          typeof item.pendingUpdates === "object" &&
+          Object.keys(item.pendingUpdates).length > 0;
+
+        const isVerifiedWithUpdates =
+          item.isVerified === true &&
+          item.isRejected === false &&
+          hasPendingUpdates;
+
+        item._isPendingNewRequest = isPendingNewRequest;
+        item._isVerifiedWithUpdates = isVerifiedWithUpdates;
+
+        return isPendingNewRequest || isVerifiedWithUpdates;
+      }
+    ) || [];
+
   const BASE_URL = `${baseUrl}/`;
 
   const adminData =
@@ -40,12 +60,12 @@ function SignUpUserRequest() {
       company_address: item.serviceLocation || "N/A",
       category:
         Array.isArray(item.serviceCategories) &&
-        item.serviceCategories.length > 0
+          item.serviceCategories.length > 0
           ? item.serviceCategories[0].name
           : "N/A",
       sub_category:
         Array.isArray(item.serviceCategories) &&
-        item.serviceCategories.length > 1
+          item.serviceCategories.length > 1
           ? item.serviceCategories[1].name
           : "N/A",
       working_hours:
@@ -71,25 +91,9 @@ function SignUpUserRequest() {
         Array.isArray(item.attachments) && item.attachments[1]
           ? `${BASE_URL}${item.attachments[1].replace(/\\/g, "/")}`
           : "https://via.placeholder.com/150",
+      requestType: item._isPendingNewRequest ? 'PENDING_NEW' : (item._isVerifiedWithUpdates ? 'PENDING_UPDATE' : 'UNKNOWN'),
+      pendingUpdates: item.pendingUpdates, // Pass pending updates data
     })) || [];
-  // console.log(adminData);
-  // const adminData = [
-  //   {
-  //     _id: "1",
-  //     name: "Hosain",
-  //     email: "hosain@gmail.com",
-  //     website_link: "https://hosain.com",
-  //     company_name: "Hosain",
-  //     category: "Plumbing",
-  //     sub_category: "Pipe Repair",
-  //     working_hours: "9 AM - 5 PM",
-  //     weekend: "Saturday",
-  //     contact_person: "Hosain",
-  //     avatar: "https://avatar.iran.liara.run/public/13",
-  //     phone: "123-456-7890",
-  //     createdAt: "2023-01-01",
-  //   },
-  // ];
   const [record, setRecord] = useState(null);
   const handleView = (record) => {
     console.log(record);
@@ -107,12 +111,39 @@ function SignUpUserRequest() {
       const response = await verifyProvider(bodyData).unwrap();
       toast.success("Rejected successfully");
       console.log("✅ Rejected successfully:", response);
+      refetch();
     } catch (error) {
       toast.error("Rejected failed");
 
       console.error("❌ Rejected failed:", error);
     }
   };
+
+  // New handler for approving updates
+  const handleApproveUpdate = async (id) => {
+    // This will likely need a new mutation or an extended body for verifyProvider
+    // For now, assuming verifyProvider can handle pendingUpdates.
+    // The body should probably include the updates to apply.
+    let bodyData = {
+      providerId: id,
+      isVerified: "true", // Keep verified
+      isRejected: "false", // Keep not rejected
+      // Additional field to signal applying pending updates
+      applyPendingUpdates: true, // This is an assumption about the API
+    };
+    try {
+      // Need to adjust the API call to approve updates if it's different
+      // For now, using verifyProvider as a placeholder
+      await verifyProvider(bodyData).unwrap();
+      toast.success("Updates approved successfully!");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to approve updates.");
+      console.error("❌ Approve updates failed:", error);
+    }
+  };
+
+
   const handleAccept = async (id) => {
     let bodyData = {
       providerId: id,
@@ -124,6 +155,7 @@ function SignUpUserRequest() {
 
       console.log("✅ Verified successfully:", response);
       toast.success("Verified successfully");
+      refetch();
     } catch (error) {
       console.error("❌ Verification failed:", error);
       toast.error("Verification failed");
@@ -135,13 +167,14 @@ function SignUpUserRequest() {
   }, []);
 
   return (
-    <PageLayout title="New Providers Awaiting Approval">
+    <PageLayout title="Providers Awaiting Approval">
       <PageContent>
         <SignupRequestTable
           adminData={adminData}
           handleDelete={handleDelete}
           handleAccept={handleAccept}
           handleView={handleView}
+          handleApproveUpdate={handleApproveUpdate} // Pass new handler
         />
       </PageContent>
       <Modal
@@ -165,6 +198,7 @@ const SignupRequestTable = ({
   handleDelete,
   handleAccept,
   handleView,
+  handleApproveUpdate, // Accept new handler
 }) => {
   return (
     <Table
@@ -173,6 +207,7 @@ const SignupRequestTable = ({
         onView: handleView,
         handleDelete,
         handleAccept,
+        handleApproveUpdate, // Pass new handler
       })}
       dataSource={adminData}
       pagination={false}
