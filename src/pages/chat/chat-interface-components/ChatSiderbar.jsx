@@ -78,7 +78,7 @@ const UserChat = ({ chatPartner, conversation, setSelectedUser, selectedUser }) 
         <p className='text-lg font-semibold'>{name}</p>
         <p className='text-gray-500'>{conversation?.lastMessage?.text || 'Click to start a conversation'}</p>
         {conversation?.unreadCount > 0 && (
-          <span className='ml-2 px-2 py-0.5 text-xs font-semibold text-white bg-red-500 rounded-full'>
+          <span className='ml-2 px-1.5 py-0.5 text-xs font-semibold text-white bg-amber-500 rounded-full'>
             {conversation.unreadCount}
           </span>
         )}

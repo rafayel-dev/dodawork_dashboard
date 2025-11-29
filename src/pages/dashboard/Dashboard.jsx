@@ -11,11 +11,12 @@ import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-t
 import Loading from "../../components/common/Loading";
 import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
 import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
+import SignUpUserRequest from "../sign-up-user-request/SignUpUserRequest";
 
 const Dashboard = () => {
   const { data: userData, isLoading, isError, error } = useGetAdminUsersQuery({});
   const { data: serviceRequestData, isLoading: isLoading2 } =
-    useGetAllServiceRequestQuery();
+    useGetAllServiceRequestQuery({});
   const { data: serviceProvider, isLoading: isLoading3 } =
     useGetAllServiceProvidersQuery();
 
@@ -29,11 +30,9 @@ const Dashboard = () => {
     return <Loading />;
   }
 
-  let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
-    (item) => {
-      if (item.status === "PENDING") return item;
-    }
-  );
+  let pendingRequest = serviceProvider?.data.providers
+    ?.filter((item) => item.isVerified === false && item.isRejected === false)
+    .slice(-3);
   
   const data = [
     {
@@ -71,20 +70,12 @@ const Dashboard = () => {
             <CompletionRate />
           </div>
         </div>
-        {/* <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-black line-clamp-1">
-            Awaiting Requests
-          </h1>
-          <Link to="/awaiting-requests">
-            <Button type="link" className="text-[var(--primary-color)]">
-              Show All
-            </Button>
-          </Link>
-        </div>
-        <AwaitingRequeststable
+
+        <SignUpUserRequest
+          title="Recent Service Provider Requests"
           pagination={false}
           pendingRequest={pendingRequest}
-        /> */}
+        />
       </PageContent>
     </PageLayout>
   );

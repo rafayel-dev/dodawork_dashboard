@@ -54,11 +54,6 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
 
     socket.on(`message_new/${currentUserId}`, messageListener);
 
-    //TODO: You might need an event to load chat history when a user is selected
-    // socket.on('conversation_update', (history) => {
-    //   setMessages(history);
-    // });
-
     return () => {
       socket.off(`message_new/${currentUserId}`, messageListener);
     };

@@ -12,15 +12,17 @@ import Loading from "../../components/common/Loading";
 import { baseUrl } from "../../utils/optimizationFunction";
 import toast from "react-hot-toast";
 
-function SignUpUserRequest() {
+function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
   const [verifyProvider, { isLoading: isVerifyingOrApproving }] =
     useVerifyServiceProviderMutation();
   const [approveProviderUpdate, { isLoading: isApprovingUpdate }] =
     useApproveProviderUpdateMutation();
-  const { data: serviceProvider, isLoading, refetch } = useGetAllServiceProvidersQuery({ page: 1, limit: 10000 });
-  
+  const { data: serviceProvider, isLoading, refetch } = useGetAllServiceProvidersQuery({ page: 1, limit: 10000 }, {
+    skip: !!pendingRequest
+  });
+
   const providers = useMemo(() => {
-    const allProviders = serviceProvider?.data?.providers || [];
+    const allProviders = pendingRequest || serviceProvider?.data?.providers || [];
     return allProviders
       .map(item => {
         const isPendingNewRequest = item.isVerified === false && item.isRejected === false;
@@ -37,7 +39,7 @@ function SignUpUserRequest() {
         return { ...item, requestType };
       })
       .filter(item => item.requestType === 'PENDING_NEW' || item.requestType === 'PENDING_UPDATE');
-  }, [serviceProvider]);
+  }, [serviceProvider, pendingRequest]);
 
   const BASE_URL = `${baseUrl}/`;
 
@@ -152,11 +154,11 @@ function SignUpUserRequest() {
   };
 
   const filteredAdminData = useMemo(() => {
-    if (filterType === 'ALL') {
+    if (filterType === 'ALL' || pendingRequest) {
       return adminData;
     }
     return adminData.filter(item => item.requestType === filterType);
-  }, [adminData, filterType]);
+  }, [adminData, filterType, pendingRequest]);
 
 
   if (isLoading || isVerifyingOrApproving || isApprovingUpdate) {
@@ -164,27 +166,31 @@ function SignUpUserRequest() {
   }
 
   return (
-    <PageLayout title="Providers Awaiting Approval">
+    <PageLayout>
       <PageContent>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Requests</h2>
-          <Select
-            defaultValue="ALL"
-            style={{ width: 150 }}
-            onChange={handleFilterChange}
-            options={[
-              { value: 'ALL', label: 'All Requests' },
-              { value: 'PENDING_NEW', label: 'Sign Up Requests' },
-              { value: 'PENDING_UPDATE', label: 'Update Requests' },
-            ]}
-          />
-        </div>
+        {title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
+        {!pendingRequest && (
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Providers Awaiting Approval</h2>
+            <Select
+              defaultValue="ALL"
+              style={{ width: 150 }}
+              onChange={handleFilterChange}
+              options={[
+                { value: 'ALL', label: 'All Requests' },
+                { value: 'PENDING_NEW', label: 'Sign Up Requests' },
+                { value: 'PENDING_UPDATE', label: 'Update Requests' },
+              ]}
+            />
+          </div>
+        )}
         <SignupRequestTable
           adminData={filteredAdminData}
           handleDelete={handleDelete}
           handleAccept={handleAccept}
           handleView={handleView}
           handleApproveUpdate={handleApproveUpdate}
+          pagination={pagination}
         />
       </PageContent>
       <Modal
@@ -209,6 +215,7 @@ const SignupRequestTable = ({
   handleAccept,
   handleView,
   handleApproveUpdate,
+  pagination,
 }) => {
   return (
     <Table
@@ -220,7 +227,7 @@ const SignupRequestTable = ({
         handleApproveUpdate,
       })}
       dataSource={adminData}
-      pagination={false}
+      pagination={pagination}
     />
   );
 };
