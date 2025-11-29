@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { baseUrl } from '../../../utils/optimizationFunction';
 import cn from '../../../lib/cn';
 import { useGetConversationListQuery } from '../../../RTK/services/chatApi';
 
 function ChatSiderbar({ setSelectedUser, socket, currentUserId, selectedUser }) {
   const { data: conversationListData, isLoading, isError, refetch } = useGetConversationListQuery();
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!socket || !currentUserId) return;
@@ -21,18 +22,23 @@ function ChatSiderbar({ setSelectedUser, socket, currentUserId, selectedUser }) 
     };
   }, [socket, currentUserId, refetch]);
 
+  const filteredConversations = conversationListData?.data?.filter(conversation => {
+    const chatPartner = conversation.participants.find(p => p.id !== currentUserId);
+    return chatPartner?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   return (
     <div className='w-[350px] h-full shadow p-1'>
       <input
         className='w-full p-2 h-[50px] border outline-none border-gray-200 rounded mb-4'
         type="text" placeholder={` Search`}
-        onChange={(e) => console.log(e.target.value)} />
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)} />
       <div className='max-h-[calc(100vh-240px)] hide-scrollbar overflow-y-auto'>
         {isLoading }
         {isError && <p className='text-center text-red-500'>Error loading conversations.</p>}
-        {!isLoading && !isError && conversationListData?.data?.length > 0 ? (
-          conversationListData.data.map((conversation) => {
-            // Find the other participant in the conversation
+        {!isLoading && !isError && filteredConversations?.length > 0 ? (
+          filteredConversations.map((conversation) => {
             const chatPartner = conversation.participants.find(p => p.id !== currentUserId);
             if (!chatPartner) return null;
 

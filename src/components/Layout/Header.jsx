@@ -42,7 +42,7 @@ function Header({ user, toggleSidebar }) {
             >
               <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                 <img
-                  src={user?.avatar}
+                  src={user?.avatar ? user.avatar : "https://avatar.iran.liara.run/public/13"}
                   alt={user?.name}
                   className="h-full w-full object-cover"
                 />

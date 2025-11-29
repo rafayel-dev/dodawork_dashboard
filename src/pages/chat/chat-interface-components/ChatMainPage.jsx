@@ -3,12 +3,10 @@ import { convertDate, formatTime } from "../../../utils/optimizationFunction";
 import cn from "../../../lib/cn";
 import { FaMessage } from "react-icons/fa6";
 import { baseUrl } from "../../../utils/optimizationFunction";
-import { useGetConversationQuery } from '../../../RTK/services/chatApi'; 
-import Loading from '../../../components/common/Loading';
-import { FiSend } from "react-icons/fi";
+import { useGetConversationQuery } from '../../../RTK/services/chatApi';
 import { IoMdSend } from "react-icons/io";
 
-function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) {
+function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, currentUserRole }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -58,9 +56,9 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
     socket.on(`message_new/${currentUserId}`, messageListener);
 
     //TODO: You might need an event to load chat history when a user is selected
-    socket.on('conversation_update', (history) => {
-      setMessages(history);
-    });
+    // socket.on('conversation_update', (history) => {
+    //   setMessages(history);
+    // });
 
     return () => {
       socket.off(`message_new/${currentUserId}`, messageListener);
@@ -82,6 +80,7 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
     if (!newMessage.trim() || !socket || !selectedUser || !currentUserId || !currentUserRole) return;
 
     const messageObject = {
+      conversationId: selectedUser?.conversationId || null,
       sender: {
         id: currentUserId,
         role: currentUserRole,
@@ -96,20 +95,20 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
       videoCover: "",
     };
 
- 
+;
     // Emit the message to the server
     socket.emit('message_new', messageObject, (response) => {
       if (response?.success) {
         console.log('✅ Message sent successfully:', response);
-  
+        if (response.conversationId && !selectedUser.conversationId) {
+          setSelectedUser({ ...selectedUser, conversationId: response.conversationId });
+        }
       } else {
         console.error('Server failed to process message:', response?.error);
         alert('Message failed to send. Please check your connection or contact support.');
       }
     });
-
     setMessages((prevMessages) => [...prevMessages, messageObject]);
-
     // Clear the input field
     setNewMessage("");
   };
@@ -120,13 +119,13 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
       {selectedUser ? (
         <>
           <div className="h-[60px] border-b border-gray-300 bg-white px-3 flex items-center gap-3 shadow-sm">
-              <div>
-                <img
-                  src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/13"}
-                  alt={selectedUser.authId?.name || selectedUser.name}
-                  className="w-12 h-12 shadow rounded-full object-cover"
-                />
-              </div>
+            <div>
+              <img
+                src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/13"}
+                alt={selectedUser.authId?.name || selectedUser.name}
+                className="w-12 h-12 shadow rounded-full object-cover"
+              />
+            </div>
             <div>
               <p className="text-lg font-semibold">{selectedUser.authId?.name || selectedUser.name}</p>
               <span className="text-xs text-gray-500">Active now</span>

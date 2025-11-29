@@ -30,7 +30,7 @@ function ChatLayout() {
 
   useEffect(() => {
     if (providerDetails && chatProviderId && !selectedUser) {
-      setSelectedUser(providerDetails.data);
+      setSelectedUser({ ...providerDetails.data, role: "PROVIDER" });
     }
   }, [providerDetails, chatProviderId, selectedUser]);
 
@@ -81,7 +81,7 @@ function ChatLayout() {
         <PageContent>
           <div className='flex gap-1 h-full'>
             <ChatSiderbar setSelectedUser={setSelectedUser} socket={socket} currentUserId={currentUserId} currentUserRole={currentUserRole} selectedUser={selectedUser} />
-            <ChatMainPage selectedUser={selectedUser} socket={socket} currentUserId={currentUserId} currentUserRole={currentUserRole} />
+            <ChatMainPage selectedUser={selectedUser} setSelectedUser={setSelectedUser} socket={socket} currentUserId={currentUserId} currentUserRole={currentUserRole} />
           </div>
         </PageContent>
       </PageLayout>
