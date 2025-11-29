@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 function ChatLayout() {
   const [selectedUser, setSelectedUser] = useState(null);
-  const socket = useRef(null);
+  const [socket, setSocket] = useState(null);
   const [chatProviderId, setChatProviderId] = useState(null);
 
   const { user: currentUser } = useSelector((state) => state.auth);
@@ -42,25 +42,27 @@ function ChatLayout() {
       return;
     }
 
-    socket.current = io(`${SOCKET_SERVER_URL}/?id=${currentUserId}&role=${currentUserRole}`, {
+    const newSocket = io(`${SOCKET_SERVER_URL}/?id=${currentUserId}&role=${currentUserRole}`, {
       transports: ["websocket"],
     });
 
-    socket.current.on('connect', () => {
-      console.log('Socket.IO connected:', socket.current.id);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('Socket.IO connected:', newSocket.id);
     });
 
-    socket.current.on('disconnect', (reason) => {
+    newSocket.on('disconnect', (reason) => {
       console.log('Socket.IO disconnected. Reason:', reason);
     });
 
-    socket.current.on('connect_error', (err) => {
+    newSocket.on('connect_error', (err) => {
       console.error('Socket.IO connection error:', err);
     });
 
     return () => {
-      if (socket.current) {
-        socket.current.disconnect();
+      if (newSocket) {
+        newSocket.disconnect();
       }
     };
   }, [currentUserId, currentUserRole]);
@@ -78,8 +80,8 @@ function ChatLayout() {
       <PageLayout className="p-0">
         <PageContent>
           <div className='flex gap-1 h-full'>
-            <ChatSiderbar setSelectedUser={setSelectedUser} socket={socket.current} currentUserId={currentUserId} currentUserRole={currentUserRole} selectedUser={selectedUser} />
-            <ChatMainPage selectedUser={selectedUser} socket={socket.current} currentUserId={currentUserId} currentUserRole={currentUserRole} />
+            <ChatSiderbar setSelectedUser={setSelectedUser} socket={socket} currentUserId={currentUserId} currentUserRole={currentUserRole} selectedUser={selectedUser} />
+            <ChatMainPage selectedUser={selectedUser} socket={socket} currentUserId={currentUserId} currentUserRole={currentUserRole} />
           </div>
         </PageContent>
       </PageLayout>

@@ -53,7 +53,7 @@ const Login = () => {
 
   return (
     <div className="w-full h-dvh flex max-w-screen-md mx-auto items-center justify-center">
-      <Card className="flex-1" style={{ width: 500 }}>
+      <Card className="flex-1 !border !border-amber-400" style={{ width: 500 }}>
         <div className="flex flex-col items-center justify-center mb-3">
           <Title level={3}>Login to Account</Title>
           <Paragraph>Please enter your email and password to continue</Paragraph>
@@ -106,7 +106,7 @@ const Login = () => {
         </Form>
       </Card>
 
-      <div className="flex-1 w-full flex items-center justify-center h-fit p-3 rounded-tr-[50px] rounded-br-[50px] bg-gradient-to-b from-[var(--primary-color)] to-[var(--secondary-color)]">
+      <div className="flex-1 w-full flex items-center justify-center ml-2 h-fit p-3 rounded-tr-[50px] rounded-br-[50px] bg-amber-100">
         <img src={brandIcon} alt="Brand Icon" className="w-48 h-48" />
       </div>
     </div>

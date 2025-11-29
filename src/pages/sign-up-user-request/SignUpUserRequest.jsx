@@ -1,47 +1,43 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect, useMemo } from "react";
 import { PageContent, PageLayout } from "../../components/PageLayout";
-import { Modal, Table } from "antd";
+import { Modal, Table, Select } from "antd";
 import { signupRequestColumn } from "./sign_up_request_component/SignupRequestColumn";
 import RequestedUser from "./sign_up_request_component/RequestedUser";
 import {
   useGetAllServiceProvidersQuery,
   useVerifyServiceProviderMutation,
+  useApproveProviderUpdateMutation,
 } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
 import Loading from "../../components/common/Loading";
 import { baseUrl } from "../../utils/optimizationFunction";
 import toast from "react-hot-toast";
 
 function SignUpUserRequest() {
-  const [verifyProvider, { isLoading: isLoading2 }] =
+  const [verifyProvider, { isLoading: isVerifyingOrApproving }] =
     useVerifyServiceProviderMutation();
+  const [approveProviderUpdate, { isLoading: isApprovingUpdate }] =
+    useApproveProviderUpdateMutation();
   const { data: serviceProvider, isLoading, refetch } = useGetAllServiceProvidersQuery({ page: 1, limit: 10000 });
-  if (isLoading || isLoading2) {
-    return <Loading />;
-  }
+  
+  const providers = useMemo(() => {
+    const allProviders = serviceProvider?.data?.providers || [];
+    return allProviders
+      .map(item => {
+        const isPendingNewRequest = item.isVerified === false && item.isRejected === false;
+        const hasPendingUpdates = item.pendingUpdates && typeof item.pendingUpdates === 'object' && Object.keys(item.pendingUpdates).length > 0;
+        const isVerifiedWithUpdates = item.isVerified === true && item.isRejected === false && hasPendingUpdates;
 
-  const providers =
-    serviceProvider?.data.providers?.filter(
-      (item) => {
-        const isPendingNewRequest =
-          item.isVerified === false &&
-          item.isRejected === false;
-
-        const hasPendingUpdates =
-          item.pendingUpdates &&
-          typeof item.pendingUpdates === "object" &&
-          Object.keys(item.pendingUpdates).length > 0;
-
-        const isVerifiedWithUpdates =
-          item.isVerified === true &&
-          item.isRejected === false &&
-          hasPendingUpdates;
-
-        item._isPendingNewRequest = isPendingNewRequest;
-        item._isVerifiedWithUpdates = isVerifiedWithUpdates;
-
-        return isPendingNewRequest || isVerifiedWithUpdates;
-      }
-    ) || [];
+        let requestType = 'NONE';
+        if (isPendingNewRequest) {
+          requestType = 'PENDING_NEW';
+        } else if (isVerifiedWithUpdates) {
+          requestType = 'PENDING_UPDATE';
+        }
+        
+        return { ...item, requestType };
+      })
+      .filter(item => item.requestType === 'PENDING_NEW' || item.requestType === 'PENDING_UPDATE');
+  }, [serviceProvider]);
 
   const BASE_URL = `${baseUrl}/`;
 
@@ -68,14 +64,7 @@ function SignUpUserRequest() {
           item.serviceCategories.length > 1
           ? item.serviceCategories[1].name
           : "N/A",
-      working_hours:
-        Array.isArray(item.workingHours) && item.workingHours.length > 0
-          ? `${item.workingHours[0].startTime} - ${item.workingHours[0].endTime}`
-          : "N/A",
-      weekend:
-        Array.isArray(item.workingHours) && item.workingHours.length > 0
-          ? item.workingHours[0].day
-          : "N/A",
+      working_hours: item.workingHours || [],
       contact_person: item.contactPerson || "N/A",
       avatar: "https://avatar.iran.liara.run/public/13",
       website_link: item.website
@@ -91,8 +80,8 @@ function SignUpUserRequest() {
         Array.isArray(item.attachments) && item.attachments[1]
           ? `${BASE_URL}${item.attachments[1].replace(/\\/g, "/")}`
           : "https://via.placeholder.com/150",
-      requestType: item._isPendingNewRequest ? 'PENDING_NEW' : (item._isVerifiedWithUpdates ? 'PENDING_UPDATE' : 'UNKNOWN'),
-      pendingUpdates: item.pendingUpdates, // Pass pending updates data
+      requestType: item.requestType,
+      pendingUpdates: item.pendingUpdates,
     })) || [];
   const [record, setRecord] = useState(null);
   const handleView = (record) => {
@@ -119,22 +108,13 @@ function SignUpUserRequest() {
     }
   };
 
-  // New handler for approving updates
   const handleApproveUpdate = async (id) => {
-    // This will likely need a new mutation or an extended body for verifyProvider
-    // For now, assuming verifyProvider can handle pendingUpdates.
-    // The body should probably include the updates to apply.
-    let bodyData = {
+    const bodyData = {
       providerId: id,
-      isVerified: "true", // Keep verified
-      isRejected: "false", // Keep not rejected
-      // Additional field to signal applying pending updates
-      applyPendingUpdates: true, // This is an assumption about the API
     };
+    
     try {
-      // Need to adjust the API call to approve updates if it's different
-      // For now, using verifyProvider as a placeholder
-      await verifyProvider(bodyData).unwrap();
+      await approveProviderUpdate(bodyData).unwrap();
       toast.success("Updates approved successfully!");
       refetch();
     } catch (error) {
@@ -162,19 +142,49 @@ function SignUpUserRequest() {
     }
   };
   const [open, setOpen] = useState(false);
+  const [filterType, setFilterType] = useState('ALL');
   const hide = useCallback((value) => {
     setOpen(!value);
   }, []);
 
+  const handleFilterChange = (value) => {
+    setFilterType(value);
+  };
+
+  const filteredAdminData = useMemo(() => {
+    if (filterType === 'ALL') {
+      return adminData;
+    }
+    return adminData.filter(item => item.requestType === filterType);
+  }, [adminData, filterType]);
+
+
+  if (isLoading || isVerifyingOrApproving || isApprovingUpdate) {
+    return <Loading />;
+  }
+
   return (
     <PageLayout title="Providers Awaiting Approval">
       <PageContent>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Requests</h2>
+          <Select
+            defaultValue="ALL"
+            style={{ width: 150 }}
+            onChange={handleFilterChange}
+            options={[
+              { value: 'ALL', label: 'All Requests' },
+              { value: 'PENDING_NEW', label: 'Sign Up Requests' },
+              { value: 'PENDING_UPDATE', label: 'Update Requests' },
+            ]}
+          />
+        </div>
         <SignupRequestTable
-          adminData={adminData}
+          adminData={filteredAdminData}
           handleDelete={handleDelete}
           handleAccept={handleAccept}
           handleView={handleView}
-          handleApproveUpdate={handleApproveUpdate} // Pass new handler
+          handleApproveUpdate={handleApproveUpdate}
         />
       </PageContent>
       <Modal
@@ -198,7 +208,7 @@ const SignupRequestTable = ({
   handleDelete,
   handleAccept,
   handleView,
-  handleApproveUpdate, // Accept new handler
+  handleApproveUpdate,
 }) => {
   return (
     <Table
@@ -207,7 +217,7 @@ const SignupRequestTable = ({
         onView: handleView,
         handleDelete,
         handleAccept,
-        handleApproveUpdate, // Pass new handler
+        handleApproveUpdate,
       })}
       dataSource={adminData}
       pagination={false}

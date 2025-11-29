@@ -98,9 +98,9 @@ export const signupRequestColumn = ({ onView, handleDelete, handleAccept, handle
               onConfirm={() => handleApproveUpdate(record?._id)}
             >
               <Button
-                icon={<FaCheck />} // Can use a different icon for clarity if needed
+                icon={<FaCheck />}
                 shape="circle"
-                style={{ backgroundColor: "#4CAF50", color: "white" }} // Green for approval
+                style={{ backgroundColor: "#93c47d", color: "white" }} 
               />
             </Popconfirm>
           </Tooltip>

@@ -82,7 +82,7 @@ function MatchedServicesTable() {
       <div style={{ marginBottom: 16 }}>
         <Select
           defaultValue="ALL"
-          style={{ width: 200 }}
+          style={{ width: 150 }}
           onChange={(value) => setStatusFilter(value)}
           options={filterOptions}
         />

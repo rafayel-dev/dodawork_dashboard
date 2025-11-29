@@ -13,9 +13,25 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  const { data: conversationData, isLoading: isLoadingConversation, isFetching: isFetchingConversation } = useGetConversationQuery(selectedUser?.conversationId, {
+  const { data: conversationData, isLoading: isLoadingConversation, isFetching: isFetchingConversation, refetch: refetchConversation } = useGetConversationQuery(selectedUser?.conversationId, {
     skip: !selectedUser?.conversationId,
   });
+
+  useEffect(() => {
+    if (!socket || !currentUserId) return;
+
+    const conversationUpdateListener = (update) => {
+      if (update.conversationId === selectedUser?.conversationId) {
+        refetchConversation();
+      }
+    };
+
+    socket.on(`conversation_update/${currentUserId}`, conversationUpdateListener);
+
+    return () => {
+      socket.off(`conversation_update/${currentUserId}`, conversationUpdateListener);
+    };
+  }, [socket, currentUserId, selectedUser, refetchConversation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,10 +57,10 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
 
     socket.on(`message_new/${currentUserId}`, messageListener);
 
-    // TODO: You might need an event to load chat history when a user is selected
-    // socket.on('chat_history', (history) => {
-    //   setMessages(history);
-    // });
+    //TODO: You might need an event to load chat history when a user is selected
+    socket.on('conversation_update', (history) => {
+      setMessages(history);
+    });
 
     return () => {
       socket.off(`message_new/${currentUserId}`, messageListener);
@@ -72,7 +88,7 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
       },
       receiver: {
         id: selectedUser._id,
-        role: selectedUser.authId ? 'PROVIDER' : 'ADMIN',
+        role: selectedUser.role,
       },
       text: newMessage,
       images: [],
@@ -124,20 +140,20 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
                   key={index}
                   className={cn(
                     "flex items-end gap-2",
-                    msg.sender.id === currentUserId ? "justify-end" : "justify-start"
+                    msg.sender.role === currentUserRole ? "justify-end" : "justify-start"
                   )}
                 >
-                  {msg.sender.id !== currentUserId && (
+                  {msg.sender.role !== currentUserRole && (
                     <img
                       className="w-8 h-8 rounded-full object-cover shadow"
-                      src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/20"}
-                      alt=""
+                      src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/15"}
+                      alt={selectedUser.name}
                     />
                   )}
                   <div
                     className={cn(
                       "p-3 rounded-2xl text-sm max-w-[60%\} shadow",
-                      msg.sender.id === currentUserId
+                      msg.sender.role === currentUserRole
                         ? "bg-[#F57C00] text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none"
                     )}
@@ -146,7 +162,7 @@ function ChatMainPage({ selectedUser, socket, currentUserId, currentUserRole }) 
                     <div
                       className={cn(
                         "text-[10px] mt-1 opacity-70",
-                        msg.sender.id === currentUserId ? "text-gray-200" : "text-gray-500"
+                        msg.sender.role === currentUserRole ? "text-gray-200" : "text-gray-500"
                       )}
                     >
                       {formatTime(msg.createdAt || new Date().toISOString())}

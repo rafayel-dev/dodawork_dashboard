@@ -28,7 +28,7 @@ function MainSidebar({ toggleSidebar, isSidebarOpen }) {
     >
       <div className="flex h-20 items-center justify-between px-4">
         <div className="flex items-center w-14 h-14 gap-2">
-          <img src={main_logo} alt="Doda_logo" />
+          <img src={main_logo} alt="Doda_logo" className="rounded-full" />
           <h1 className="text-xl font-bold">Dodawork</h1>
         </div>
         <button className="rounded-md p-1 text-gray-400 hover:bg-gray-700 lg:hidden">

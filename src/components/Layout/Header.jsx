@@ -42,12 +42,12 @@ function Header({ user, toggleSidebar }) {
             >
               <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                 <img
-                  src={user.avatar}
-                  alt={user.name}
+                  src={user?.avatar}
+                  alt={user?.name}
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="hidden md:inline-block text-sm font-medium text-gray-700">
+              <span className="hidden md:inline-block text-sm font-medium text-gray-800">
                 {user.name}
               </span>
               <FiChevronDown

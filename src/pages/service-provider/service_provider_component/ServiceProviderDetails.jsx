@@ -1,5 +1,5 @@
 import { Card, Modal } from 'antd'
-import React from 'react'
+import React, { useState } from 'react'
 import { BsPersonBoundingBox } from 'react-icons/bs'
 import { CgTime } from 'react-icons/cg'
 import { FaAddressBook, FaBuilding, FaGlobe } from 'react-icons/fa'
@@ -19,6 +19,7 @@ const Info = ({ title, value, icon }) => {
 }
 
 function ServiceProviderDetails({ open = false, hide, providerId }) {
+  const [preview, setPreview] = useState(null);
   const { data: providerDetails, isLoading, isError } = useGetServiceProviderByIdQuery(providerId, {
     skip: !providerId,
   });
@@ -48,7 +49,7 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
   ]
 
   return (
-    <Modal width={800} centered open={open} footer={null} onCancel={hide}>
+    <Modal width={600} centered open={open} footer={null} onCancel={hide}>
       {isLoading && <Loading />}
       {isError && <p>Error loading provider details.</p>}
       {record && !isLoading && !isError && (
@@ -77,7 +78,12 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
               {record?.attachments?.length > 0 ? (
                 record.attachments.map((attachment, index) => (
                   <div key={index}>
-                    <img src={`${BASE_URL}${attachment.replace(/\\/g, "/")}`} alt={`${record?.authId?.name} attachment ${index + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={`${BASE_URL}${attachment.replace(/\\/g, "/")}`}
+                      alt={`${record?.authId?.name} attachment ${index + 1}`}
+                      className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
+                      onClick={() => setPreview(`${BASE_URL}${attachment.replace(/\\/g, "/")}`)}
+                    />
                   </div>
                 ))
               ) : (
@@ -87,6 +93,19 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
           </Card>
         </>
       )}
+
+      <Modal
+        open={!!preview}
+        footer={null}
+        onCancel={() => setPreview(null)}
+      >
+        <img
+          src={preview}
+          alt="Preview"
+          className="w-full h-auto rounded"
+        />
+      </Modal>
+
     </Modal>
   )
 }

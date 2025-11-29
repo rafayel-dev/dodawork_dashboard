@@ -31,6 +31,14 @@ const serviceProvidersApi = baseApi.injectEndpoints({
 
       invalidatesTags: ["serviceProvider"],
     }),
+    approveProviderUpdate: builder.mutation({
+      query: (body) => ({
+        url: "/provider/approve-update",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["serviceProvider"],
+    }),
   }),
 });
 
@@ -38,6 +46,7 @@ export const {
   useGetAllServiceProvidersQuery,
   useGetServiceProviderByIdQuery,
   useVerifyServiceProviderMutation,
+  useApproveProviderUpdateMutation,
 } = serviceProvidersApi;
 
 
