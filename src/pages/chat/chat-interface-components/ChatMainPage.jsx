@@ -11,7 +11,7 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  const { data: conversationData, isLoading: isLoadingConversation, isFetching: isFetchingConversation, refetch: refetchConversation } = useGetConversationQuery(selectedUser?.conversationId, {
+  const { data: conversationData, isLoading: isLoadingConversation, isFetching: isFetchingConversation, refetch } = useGetConversationQuery(selectedUser?.conversationId, {
     skip: !selectedUser?.conversationId,
   });
 
@@ -19,9 +19,8 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
     if (!socket || !currentUserId) return;
 
     const conversationUpdateListener = (update) => {
-      if (update.conversationId === selectedUser?.conversationId) {
-        refetchConversation();
-      }
+      console.log('Received conversation update:', update);
+      refetch();
     };
 
     socket.on(`conversation_update/${currentUserId}`, conversationUpdateListener);
@@ -29,7 +28,7 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
     return () => {
       socket.off(`conversation_update/${currentUserId}`, conversationUpdateListener);
     };
-  }, [socket, currentUserId, selectedUser, refetchConversation]);
+  }, [socket, currentUserId, refetch]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -95,7 +94,7 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
       videoCover: "",
     };
 
-;
+    ;
     // Emit the message to the server
     socket.emit('message_new', messageObject, (response) => {
       if (response?.success) {
@@ -109,7 +108,6 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
       }
     });
     setMessages((prevMessages) => [...prevMessages, messageObject]);
-    // Clear the input field
     setNewMessage("");
   };
 
