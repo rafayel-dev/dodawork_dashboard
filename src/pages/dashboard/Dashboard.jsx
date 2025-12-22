@@ -7,11 +7,11 @@ import total_income from "../../assets/income.svg";
 import service_providers from "../../assets/service_provider.svg";
 import RequestsTrend from "../../components/charts/RequestsTrend";
 import CompletionRate from "../../components/charts/CompletionRate";
-import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
 import Loading from "../../components/common/Loading";
-import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
-import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 import SignUpUserRequest from "../sign-up-user-request/SignUpUserRequest";
+import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
+import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/serviceRequestApis";
 
 const Dashboard = () => {
   const { data: userData, isLoading, isError, error } = useGetAdminUsersQuery({});

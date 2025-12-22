@@ -35,7 +35,7 @@ function ChatLayout() {
   }, [providerDetails, chatProviderId, selectedUser]);
 
   useEffect(() => {
-    const SOCKET_SERVER_URL = "http://3.96.86.190:3001";
+    const SOCKET_SERVER_URL = "http://10.10.20.52:6002";
 
     if (!currentUserId || !currentUserRole) {
       console.warn("Cannot initialize socket: Missing user info");
