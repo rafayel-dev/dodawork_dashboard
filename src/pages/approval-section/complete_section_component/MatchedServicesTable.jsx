@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Table, Modal, Select } from "antd"; // Import Select
 import { matchedServicesColumns } from "./matchedServicesColumns";
 import MatchedServicesDetailsCard from "./MatchedServicesDetailsCard";
-import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/safe-user/admins/serviceRequest/ServiceRequestApis";
+import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/safe-user/admins/serviceRequest/serviceRequestApis";
 import Loading from "../../../components/common/Loading";
 import { baseUrl } from "../../../utils/optimizationFunction";
 
