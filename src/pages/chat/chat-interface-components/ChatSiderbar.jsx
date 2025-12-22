@@ -64,7 +64,7 @@ export default ChatSiderbar
 
 const UserChat = ({ chatPartner, conversation, setSelectedUser, selectedUser }) => {
   const name = chatPartner.name;
-  const avatar = chatPartner.profileImage ? `${baseUrl}/${chatPartner.profileImage}` : "https://avatar.iran.liara.run/public/13";
+  const avatar = chatPartner.profileImage ? `${baseUrl}/${chatPartner.profileImage}` : "https://placehold.net/avatar.svg?text=EJ&bg=212121";
   const isActive = selectedUser?._id === chatPartner.id;
 
   return (
@@ -75,13 +75,13 @@ const UserChat = ({ chatPartner, conversation, setSelectedUser, selectedUser }) 
       )}>
       <img className='min-w-12 w-12 h-12 min-h-12 border border-gray-200 shadow object-cover rounded-full' src={avatar} alt={name} />
       <div>
-        <p className='text-lg font-semibold'>{name}</p>
+        <div className='flex justify-center items-center'>
+          <p className='text-lg font-semibold'>{name}</p>
+         {/* {conversation?.unreadCount > 0 && (
+          <div className='ml-2 w-2 h-2 rounded-full bg-amber-500'></div>
+        )} */}
+        </div>
         <p className='text-gray-500'>{conversation?.lastMessage?.text || 'Click to start a conversation'}</p>
-        {conversation?.unreadCount > 0 && (
-          <span className='ml-2 px-1.5 py-0.5 text-xs font-semibold text-white bg-amber-500 rounded-full'>
-            {conversation.unreadCount}
-          </span>
-        )}
       </div>
     </div>
   )

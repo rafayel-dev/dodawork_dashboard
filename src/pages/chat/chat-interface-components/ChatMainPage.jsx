@@ -5,11 +5,14 @@ import { FaMessage } from "react-icons/fa6";
 import { baseUrl } from "../../../utils/optimizationFunction";
 import { useGetConversationQuery } from '../../../RTK/services/chatApi';
 import { IoMdSend } from "react-icons/io";
+import { GrAttachment } from "react-icons/gr";
 
 function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, currentUserRole }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const { data: conversationData, isLoading: isLoadingConversation, isFetching: isFetchingConversation, refetch } = useGetConversationQuery(selectedUser?.conversationId, {
     skip: !selectedUser?.conversationId,
@@ -67,11 +70,52 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
     }
   }, [conversationData, selectedUser]);
 
+  const handleFileChange = (e) => {
+    setSelectedFiles([...e.target.files]);
+  };
 
-  const handleSendMessage = (e) => {
+  const uploadFiles = async (files) => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('media', file);
+    });
+
+    try {
+      const response = await fetch(`${baseUrl}/chat/chat-images-video`, {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (result.success) {
+        return result.data;
+      } else {
+        console.error('File upload failed:', result.message);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      return null;
+    }
+  };
+
+  const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!newMessage.trim() || !socket || !selectedUser || !currentUserId || !currentUserRole) return;
+    if ((!newMessage.trim() && selectedFiles.length === 0) || !socket || !selectedUser || !currentUserId || !currentUserRole) return;
+
+    let images = [];
+    let video = "";
+
+    if (selectedFiles.length > 0) {
+      const uploadedMedia = await uploadFiles(selectedFiles);
+      if (uploadedMedia) {
+        images = uploadedMedia.images || [];
+        video = uploadedMedia.video || "";
+      } else {
+        alert('File upload failed. Please try again.');
+        return;
+      }
+    }
 
     const messageObject = {
       conversationId: selectedUser?.conversationId || null,
@@ -84,13 +128,11 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
         role: selectedUser.role,
       },
       text: newMessage,
-      images: [],
-      video: "",
+      images: images,
+      video: video,
       videoCover: "",
     };
 
-    ;
-    // Emit the message to the server
     socket.emit('message_new', messageObject, (response) => {
       if (response?.success) {
         console.log('✅ Message sent successfully:', response);
@@ -104,8 +146,11 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
     });
     setMessages((prevMessages) => [...prevMessages, messageObject]);
     setNewMessage("");
+    setSelectedFiles([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
-
 
   return (
     <div className="w-full flex flex-col bg-gray-50">
@@ -114,7 +159,7 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
           <div className="h-[60px] border-b border-gray-300 bg-white px-3 flex items-center gap-3 shadow-sm">
             <div>
               <img
-                src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/13"}
+                src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://placehold.net/avatar.svg?text=EJ&bg=212121"}
                 alt={selectedUser.authId?.name || selectedUser.name}
                 className="w-12 h-12 shadow rounded-full object-cover"
               />
@@ -138,19 +183,29 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
                   {msg.sender.role !== currentUserRole && (
                     <img
                       className="w-8 h-8 rounded-full object-cover shadow"
-                      src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://avatar.iran.liara.run/public/15"}
+                      src={selectedUser.profileImage ? `${baseUrl}/${selectedUser.profileImage}` : "https://placehold.net/avatar.svg?text=EJ&bg=212121"}
                       alt={selectedUser.name}
                     />
                   )}
                   <div
                     className={cn(
-                      "p-3 rounded-2xl text-sm max-w-[60%\} shadow",
+                      "p-3 rounded-2xl text-sm max-w-[60%] shadow",
                       msg.sender.role === currentUserRole
                         ? "bg-[#F57C00] text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none"
                     )}
                   >
-                    <p>{msg.text}</p>
+                    {msg.text && <p>{msg.text}</p>}
+                    {msg.images && msg.images.length > 0 && (
+                      <div className="grid grid-cols-2 gap-1 mt-2">
+                        {msg.images.map((img, i) => (
+                          <img key={i} src={`${baseUrl}/${img}`} alt="sent image" className="rounded-lg object-cover w-full h-auto" />
+                        ))}
+                      </div>
+                    )}
+                    {msg.video && (
+                      <video controls src={`${baseUrl}/${msg.video}`} className="mt-2 rounded-lg w-full"></video>
+                    )}
                     <div
                       className={cn(
                         "text-[10px] mt-1 opacity-70",
@@ -174,8 +229,21 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="h-[60px] border-t border-gray-300 bg-white flex items-center px-3 gap-2">
-            <form className="flex items-center gap-2 w-full" onSubmit={handleSendMessage}>
+          <div className="border-t border-gray-300 bg-white">
+            <form className="flex items-center gap-2 w-full p-2" onSubmit={handleSendMessage}>
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+                id="file-input"
+              />
+              <label htmlFor="file-input" className="cursor-pointer p-2">
+                <GrAttachment size={20} className="text-gray-500" />
+              </label>
+
               <input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
@@ -184,10 +252,38 @@ function ChatMainPage({ selectedUser, setSelectedUser, socket, currentUserId, cu
                 placeholder="Type a message..."
                 className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#F57C00] text-sm"
               />
+
               <button type="submit" className="bg-[#FFB900] text-white px-4 py-2 rounded-full text-md hover:bg-[#ff952b] transition duration-300 cursor-pointer">
                 <IoMdSend size={24} />
               </button>
             </form>
+            {selectedFiles.length > 0 && (
+              <div className="p-2 bg-gray-100 border-t">
+                <p className="text-sm font-semibold mb-1">Selected files:</p>
+
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(selectedFiles).map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 text-xs bg-gray-200 px-2 py-1 rounded"
+                    >
+                      {file.name}
+                      <button
+                        onClick={() => {
+                          const updated = [...selectedFiles];
+                          updated.splice(index, 1);
+                          setSelectedFiles(updated);
+                        }}
+                        className="text-red-600 ml-1 font-bold"
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
         </>
       ) : (

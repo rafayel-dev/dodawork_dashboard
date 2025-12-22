@@ -71,7 +71,7 @@ function ServiceProviderTable() {
         contact_person: item.contactPerson || "N/A",
         avatar: item.profile_image
           ? `${BASE_URL}${item.profile_image.replace(/\\/g, "/")}`
-          : "https://avatar.iran.liara.run/public/13",
+          : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
         website_link: item.website || "N/A",
       })),
     [providers, BASE_URL]
@@ -128,6 +128,8 @@ function ServiceProviderTable() {
           },
           showSizeChanger: true,
           showLessItems: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           pageSizeOptions: ['10', '20', '50', '100'],
         }}
         scroll={{ x: "max-content" }}

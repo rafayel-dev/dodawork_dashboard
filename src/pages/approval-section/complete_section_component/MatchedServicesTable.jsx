@@ -11,47 +11,46 @@ function MatchedServicesTable() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
 
-  const { data: serviceRequestData, isLoading } = useGetAllServiceRequestQuery(statusFilter);
+  const { data: serviceRequestData, isLoading } = useGetAllServiceRequestQuery({
+    status: statusFilter,
+    page: pagination.page,
+    limit: pagination.limit,
+  });
 
   const serviceRequests = serviceRequestData?.data?.serviceRequests || [];
+  const total = serviceRequestData?.data?.meta?.total || 0;
 
-  const data = useMemo(() => serviceRequests.map((item) => ({
+  const data = serviceRequests.map((item) => ({
     request_id: item.requestId || item._id || "N/A",
     key: item._id || Math.random().toString(),
     name: item.customerId?.name || "Unknown",
     category: item.serviceCategory?.name || "N/A",
     email: item.customerId?.email || "N/A",
     phone: item.customerId?.phoneNumber || item.customerPhone || "N/A",
-    date: item.startDate
-      ? new Date(item.startDate).toISOString().split("T")[0]
+    date: item.startDate && item.endDate
+      ? `${new Date(item.startDate).toISOString().split("T")[0]} - ${new Date(item.endDate).toISOString().split("T")[0]
+      }`
       : "N/A",
-    time: item.startTime || "N/A",
+    time: item.startTime && item.endTime
+      ? `${item.startTime} - ${item.endTime}`
+      : "N/A",
     priority: item.priority || "Normal",
-    status: item.status, // Use raw status
-    avatar: "https://avatar.iran.liara.run/public/13",
+    status: item.status,
+    avatar: "https://placehold.net/avatar.svg?text=EJ&bg=212121",
     action: "View",
     video: Array.isArray(item.attachments)
       ? item.attachments.some(
-          (a) =>
-            a.toLowerCase().endsWith(".mp4") || a.toLowerCase().endsWith(".mov")
-        )
+        (a) =>
+          a.toLowerCase().endsWith(".mp4") || a.toLowerCase().endsWith(".mov")
+      )
       : false,
     service_image_or_video:
       Array.isArray(item.attachments) && item.attachments.length > 0
         ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
-        : "https://via.placeholder.com/150",
-  })), [serviceRequests, BASE_URL]);
-
-  const filteredData = useMemo(
-    () => {
-      if (statusFilter === "ALL") {
-        return data;
-      }
-      return data.filter((item) => item.status === statusFilter);
-    },
-    [data, statusFilter]
-  );
+        : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
+  }));
 
   const filterOptions = [
     { value: 'ALL', label: 'All Statuses' },
@@ -72,6 +71,13 @@ function MatchedServicesTable() {
     }, 2000);
   }, []);
 
+  const handleTableChange = (pagination) => {
+    setPagination({
+      page: pagination.current,
+      limit: pagination.pageSize,
+    });
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -83,15 +89,24 @@ function MatchedServicesTable() {
         <Select
           defaultValue="ALL"
           style={{ width: 150 }}
-          onChange={(value) => setStatusFilter(value)}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setPagination({ page: 1, limit: 10 });
+          }}
           options={filterOptions}
         />
       </div>
 
       <Table
         columns={matchedServicesColumns(handleView)}
-        dataSource={filteredData}
-        pagination={false}
+        dataSource={data}
+        pagination={{
+          current: pagination.page,
+          pageSize: pagination.limit,
+          total: total,
+
+        }}
+        onChange={handleTableChange}
         scroll={{ x: "max-content" }}
         size="large"
         bordered

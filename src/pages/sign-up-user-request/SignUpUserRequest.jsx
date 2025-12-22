@@ -68,7 +68,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
           : "N/A",
       working_hours: item.workingHours || [],
       contact_person: item.contactPerson || "N/A",
-      avatar: "https://avatar.iran.liara.run/public/13",
+      avatar: "https://placehold.net/avatar.svg?text=EJ&bg=212121",
       website_link: item.website
         ? item.website.startsWith("http")
           ? item.website
@@ -77,11 +77,11 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
       certificate:
         Array.isArray(item.attachments) && item.attachments[0]
           ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
-          : "https://via.placeholder.com/150",
+          : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
       license:
         Array.isArray(item.attachments) && item.attachments[1]
           ? `${BASE_URL}${item.attachments[1].replace(/\\/g, "/")}`
-          : "https://via.placeholder.com/150",
+          : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
       requestType: item.requestType,
       pendingUpdates: item.pendingUpdates,
     })) || [];

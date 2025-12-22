@@ -24,7 +24,7 @@ export const matchedServicesColumns = (onView) => [
     key: "category",
   },
   {
-    title: "Service Image or Video",
+    title: "Service Media",
     dataIndex: "service_image_or_video",
     key: "service_image_or_video",
     render: (text, record) => {
@@ -42,9 +42,14 @@ export const matchedServicesColumns = (onView) => [
     },
   },
   {
-    title: "Date & Time",
+    title: "Start-End Date",
     dataIndex: "date",
     key: "date",
+  },
+  {
+    title: "Start-End Time",
+    dataIndex: "time",
+    key: "time",
   },
   {
     title: "Priority",

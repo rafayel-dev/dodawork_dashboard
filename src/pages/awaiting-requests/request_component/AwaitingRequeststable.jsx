@@ -1,27 +1,28 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { Table, Modal } from "antd";
 import { awaitingRequestsColumns } from "./awaitingRequestsColumns";
 import AwaitingRequestsDetailsCard from "./AwaitingRequestsDetailsCard";
 import { baseUrl } from "../../../utils/optimizationFunction";
 import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
 import Loading from "../../../components/common/Loading";
-function AwaitingRequeststable({ pagination }) {
+
+function AwaitingRequeststable({ pagination: paginationProp }) {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
-  const { data: serviceRequestData, isLoading: isLoading } =
-    useGetAllServiceRequestQuery();
-  let pendingRequest = serviceRequestData?.data.serviceRequests?.filter(
-    (item) => {
-      if (item.status === "PENDING") return item;
-    }
-  );
-  if (isLoading) {
-    <Loading />;
-  }
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+
+  const { data: serviceRequestData, isLoading } = useGetAllServiceRequestQuery({
+    status: 'PENDING',
+    page: pagination.page,
+    limit: pagination.limit,
+  });
+
+  const serviceRequests = serviceRequestData?.data?.serviceRequests || [];
+  const total = serviceRequestData?.data?.meta?.total || 0;
 
   const BASE_URL = `${baseUrl}/`;
 
-  const data = pendingRequest?.map((item) => ({
+  const data = useMemo(() => serviceRequests.map((item) => ({
     request_id: item.requestId || item._id || "N/A",
     key: item._id || item.requestId || Math.random().toString(),
     name: item.customerId?.name || "Unknown",
@@ -46,7 +47,7 @@ function AwaitingRequeststable({ pagination }) {
       Array.isArray(item.attachments) && item.attachments.length > 0
         ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
         : "https://via.placeholder.com/150",
-  }));
+  })), [serviceRequests, BASE_URL]);
 
   const handleView = useCallback((record) => {
     setSelectedRequest(record);
@@ -59,6 +60,17 @@ function AwaitingRequeststable({ pagination }) {
       alert(`${record.name} cancelled successfully`);
     }, 2000);
   }, []);
+  
+  const handleTableChange = (pagination) => {
+    setPagination({
+      page: pagination.current,
+      limit: pagination.pageSize,
+    });
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div>
@@ -66,7 +78,12 @@ function AwaitingRequeststable({ pagination }) {
       <Table
         columns={awaitingRequestsColumns(handleView)}
         dataSource={data}
-        pagination={false}
+        pagination={paginationProp && {
+          current: pagination.page,
+          pageSize: pagination.limit,
+          total: total,
+        }}
+        onChange={handleTableChange}
         scroll={{ x: "max-content" }}
         size="large"
         bordered

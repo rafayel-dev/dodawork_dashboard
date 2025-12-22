@@ -7,6 +7,7 @@ import { MdRoomService } from 'react-icons/md'
 import { useGetServiceProviderByIdQuery } from '../../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi'
 import Loading from '../../../components/common/Loading'
 import { baseUrl } from '../../../utils/optimizationFunction'
+import { PiIdentificationBadge } from 'react-icons/pi'
 
 
 const Info = ({ title, value, icon }) => {
@@ -40,6 +41,7 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
   );
 
   const InfoData = [
+    { title: "Provider ID", value: record?._id || "N/A", icon: <PiIdentificationBadge /> },
     { title: "Company name", value: record?.companyName || "N/A", icon: <FaBuilding /> },
     { title: "Company address", value: record?.serviceLocation || "N/A", icon: <FaAddressBook /> },
     { title: "Web site", value: record?.website || "N/A", icon: <FaGlobe /> },
@@ -57,7 +59,7 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
           <Card>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-24 h-20">
-                <img src={record?.profile_image ? `${BASE_URL}${record.profile_image.replace(/\\/g, "/")}` : "https://avatar.iran.liara.run/public/13"} alt={record?.authId?.name} className="w-full h-full object-cover" />
+                <img src={record?.profile_image ? `${BASE_URL}${record.profile_image.replace(/\\/g, "/")}` : "https://placehold.net/avatar.svg?text=EJ&bg=212121"} alt={record?.authId?.name} className="w-full h-full object-cover" />
               </div>
               <div className="w-full">
                 <h2 className="font-semibold text-lg">{record?.authId?.name}</h2>
