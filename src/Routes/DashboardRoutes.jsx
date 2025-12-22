@@ -1,98 +1,167 @@
-import React from "react";
-import Dashboard from "../pages/dashboard/Dashboard";
-import Profile from "../pages/profile/Profile";
-import UserManagement from "../pages/user-management/UserManagement";
-import AwaitingRequests from "../pages/awaiting-requests/AwaitingRequests";
-import ServiceProvider from "../pages/service-provider/ServiceProvider";
-import CategoriesManagement from "../pages/categories-management/CategoriesManagement";
-import MatchedServices from "../pages/approval-section/MatchedServices";
-import FAQ from "../pages/faq/FAQ";
-import PrivacyPolicy from "../pages/privacy-policy/PrivacyPolicy";
-import TermsAndConditions from "../pages/terms/TermsAndConditions";
-import NotFound from "../pages/NotFound";
-import Layout from "../components/Layout/Layout";
-import SubcategoryManagement from "../pages/categories-management copy/SubcategoryManagement";
-import Test from "../components/common/Test";
-import ChatLayout from "../pages/chat/ChatLayout";
-import AdminPage from "../pages/admin/AdminPage";
-import SignUpUserRequest from "../pages/sign-up-user-request/SignUpUserRequest";
-import AuthChecker from "../security/AuthChecker";
+import React, { Suspense } from "react";
+import lazyImport from "../utils/lazyImport";
+
+const Dashboard = lazyImport(() => import("../pages/dashboard/Dashboard"));
+const Profile = lazyImport(() => import("../pages/profile/Profile"));
+const UserManagement = lazyImport(() => import("../pages/user-management/UserManagement"));
+const AwaitingRequests = lazyImport(() => import("../pages/awaiting-requests/AwaitingRequests"));
+const ServiceProvider = lazyImport(() => import("../pages/service-provider/ServiceProvider"));
+const CategoriesManagement = lazyImport(() => import("../pages/categories-management/CategoriesManagement"));
+const SubcategoryManagement = lazyImport(() => import("../pages/categories-management copy/SubcategoryManagement"));
+const MatchedServices = lazyImport(() => import("../pages/approval-section/MatchedServices"));
+const FAQ = lazyImport(() => import("../pages/faq/FAQ"));
+const PrivacyPolicy = lazyImport(() => import("../pages/privacy-policy/PrivacyPolicy"));
+const TermsAndConditions = lazyImport(() => import("../pages/terms/TermsAndConditions"));
+const NotFound = lazyImport(() => import("../pages/NotFound"));
+const Test = lazyImport(() => import("../components/common/Test"));
+const ChatLayout = lazyImport(() => import("../pages/chat/ChatLayout"));
+const AdminPage = lazyImport(() => import("../pages/admin/AdminPage"));
+const SignUpUserRequest = lazyImport(() => import("../pages/sign-up-user-request/SignUpUserRequest"));
+const Layout = lazyImport(() => import("../components/Layout/Layout"));
+const AuthChecker = lazyImport(() => import("../security/AuthChecker"));
 
 export const DashboardRoutes = {
-    path: "/",
-    errorElement: <NotFound />,
-    element:
-        <AuthChecker>
-            <Layout />
-        </AuthChecker>,
-    children: [
-        {
-            index: true,
-            element: <Dashboard />,
-        },
-        {
-            path: "/",
-            element: <Dashboard />,
-        },
-        {
-            path: "profile",
-            element: <Profile />,
-        },
-        {
-            path: "user-management",
-            element: <UserManagement />,
-        },
-        {
-            path: "awaiting-requests",
-            element: <AwaitingRequests />,
-        },
-        {
-            path: "service-provider",
-            element: <ServiceProvider />,
-        },
-        {
-            path: "sign-up-user-request",
-            element: <SignUpUserRequest />,
-        },
-        {
-            path: "categories-management",
-            element: <CategoriesManagement />,
-        },
-        {
-            path: "categories-management/sub-category/:id",
-            element: <SubcategoryManagement />,
-        },
-        {
-            path: "matched-services",
-            element: <MatchedServices />,
-        },
-        {
-            path: "admin",
-            element: <AdminPage />,
-        },
-        {
-            path: "faq",
-            element: <FAQ />,
-        },
-        {
-            path: "privacy-policy",
-            element: <PrivacyPolicy />,
-        },
-        {
-            path: "terms",
-            element: <TermsAndConditions />,
-        },
-        {
-            path: "test",
-            element: <Test />,
-        },
-        {
-            path: "chat",
-            element: <ChatLayout />,
-        },
-        {
-            path: "*",
-            element: <NotFound />,
-        },
-    ],
+  path: "/",
+  errorElement: (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotFound />
+    </Suspense>
+  ),
+  element: (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthChecker>
+        <Layout />
+      </AuthChecker>
+    </Suspense>
+  ),
+  children: [
+    {
+      index: true,
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <Dashboard />
+        </Suspense>
+      ),
+    },
+    {
+      path: "profile",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <Profile />
+        </Suspense>
+      ),
+    },
+    {
+      path: "user-management",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <UserManagement />
+        </Suspense>
+      ),
+    },
+    {
+      path: "awaiting-requests",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <AwaitingRequests />
+        </Suspense>
+      ),
+    },
+    {
+      path: "service-provider",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ServiceProvider />
+        </Suspense>
+      ),
+    },
+    {
+      path: "sign-up-user-request",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <SignUpUserRequest />
+        </Suspense>
+      ),
+    },
+    {
+      path: "categories-management",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <CategoriesManagement />
+        </Suspense>
+      ),
+    },
+    {
+      path: "categories-management/sub-category/:id",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <SubcategoryManagement />
+        </Suspense>
+      ),
+    },
+    {
+      path: "matched-services",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <MatchedServices />
+        </Suspense>
+      ),
+    },
+    {
+      path: "admin",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <AdminPage />
+        </Suspense>
+      ),
+    },
+    {
+      path: "faq",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <FAQ />
+        </Suspense>
+      ),
+    },
+    {
+      path: "privacy-policy",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <PrivacyPolicy />
+        </Suspense>
+      ),
+    },
+    {
+      path: "terms",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <TermsAndConditions />
+        </Suspense>
+      ),
+    },
+    {
+      path: "test",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <Test />
+        </Suspense>
+      ),
+    },
+    {
+      path: "chat",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ChatLayout />
+        </Suspense>
+      ),
+    },
+    {
+      path: "*",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <NotFound />
+        </Suspense>
+      ),
+    },
+  ],
 };
