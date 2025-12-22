@@ -3,7 +3,7 @@ import { Table, Modal } from "antd";
 import { awaitingRequestsColumns } from "./awaitingRequestsColumns";
 import AwaitingRequestsDetailsCard from "./AwaitingRequestsDetailsCard";
 import { baseUrl } from "../../../utils/optimizationFunction";
-import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/ServiceRequestApis";
+import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/safe-user/admins/serviceRequest/ServiceRequestApis";
 import Loading from "../../../components/common/Loading";
 
 function AwaitingRequeststable({ pagination: paginationProp }) {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Form, Input, Button } from "antd";
 import ImageUploader from "../../../components/common/ImageUploader";
 import { useEffect } from "react";
-import { useCreateAdminMutation, useUpdateAdminMutation } from "../../../RTK/services/dashboard/authorised-teams/admins/adminApis";
+import { useCreateAdminMutation, useUpdateAdminMutation } from "../../../RTK/services/dashboard/safe-user/admins/adminApis";
 import toast from "react-hot-toast";
 import { imageUrl } from "../../../utils/optimizationFunction";
 

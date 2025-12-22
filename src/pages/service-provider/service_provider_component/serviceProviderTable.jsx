@@ -8,7 +8,7 @@ import { baseUrl } from "../../../utils/optimizationFunction";
 import {
   useGetAllServiceProvidersQuery,
   useVerifyServiceProviderMutation,
-} from "../../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
+} from "../../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi";
 
 function ServiceProviderTable() {
   const [currentPage, setCurrentPage] = useState(1);

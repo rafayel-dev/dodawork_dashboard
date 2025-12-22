@@ -4,7 +4,7 @@ import ProfileSidebar from "../ProfileSidebar/ProfileSidebar";
 import MainSidebar from "./MainSidebar";
 import Header from "./Header";
 import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis";
-import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/authorised-teams/admins/adminApis"; // Import admin profile hook
+import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/safe-user/admins/adminApis"; // Import admin profile hook
 import { imageUrl } from "../../utils/optimizationFunction";
 import { useSelector } from "react-redux"; // Import useSelector
 

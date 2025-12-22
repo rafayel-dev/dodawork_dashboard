@@ -3,7 +3,7 @@ import { FiBell, FiCheck, FiAlertCircle, FiInfo } from "react-icons/fi";
 import {
   useGetAllNotificationsQuery,
   useLazyGetNotificationQuery,
-} from "../../RTK/services/dashboard/authorised-teams/notification/notificationApi";
+} from "../../RTK/services/dashboard/safe-user/notification/notificationApi";
 import NotificationModal from "./NotificationModal";
 
 const Notifications = () => {

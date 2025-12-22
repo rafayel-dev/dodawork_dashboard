@@ -5,7 +5,7 @@ import ProfileEdit from "../../components/profile-component/ProfileEdit.jsx";
 import ChangePassword from "../../components/profile-component/ChangePassword.jsx";
 import { useSelector } from "react-redux";
 import { useGetSuperAdminProfileQuery } from "../../RTK/services/profileApis/superAdminProfileApis.js";
-import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/authorised-teams/admins/adminApis.js";
+import { useGetProfileAdminQuery } from "../../RTK/services/dashboard/safe-user/admins/adminApis.js";
 import { imageUrl } from "../../utils/optimizationFunction.js";
 
 const Tabs = ["Edit Profile", "Change Password"];

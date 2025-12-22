@@ -9,9 +9,9 @@ import RequestsTrend from "../../components/charts/RequestsTrend";
 import CompletionRate from "../../components/charts/CompletionRate";
 import Loading from "../../components/common/Loading";
 import SignUpUserRequest from "../sign-up-user-request/SignUpUserRequest";
-import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
-import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
-import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/authorised-teams/admins/serviceRequest/serviceRequestApis";
+import { useGetAdminUsersQuery } from "../../RTK/services/dashboard/safe-user/admins/user/userApis";
+import { useGetAllServiceProvidersQuery } from "../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi";
+import { useGetAllServiceRequestQuery } from "../../RTK/services/dashboard/safe-user/admins/serviceRequest/serviceRequestApis";
 
 const Dashboard = () => {
   const { data: userData, isLoading, isError, error } = useGetAdminUsersQuery({});

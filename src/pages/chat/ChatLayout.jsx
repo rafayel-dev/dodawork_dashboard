@@ -3,7 +3,7 @@ import ChatMainPage from './chat-interface-components/ChatMainPage';
 import ChatSiderbar from './chat-interface-components/ChatSiderbar';
 import { PageContent, PageLayout } from '../../components/PageLayout';
 import { io } from 'socket.io-client';
-import { useGetServiceProviderByIdQuery } from '../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi';
+import { useGetServiceProviderByIdQuery } from '../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi';
 import Loading from '../../components/common/Loading';
 import { useSelector } from 'react-redux';
 
@@ -35,7 +35,7 @@ function ChatLayout() {
   }, [providerDetails, chatProviderId, selectedUser]);
 
   useEffect(() => {
-    const SOCKET_SERVER_URL = "http://10.10.20.52:6002";
+    const SOCKET_SERVER_URL = "http://3.96.86.190:3001";
 
     if (!currentUserId || !currentUserRole) {
       console.warn("Cannot initialize socket: Missing user info");

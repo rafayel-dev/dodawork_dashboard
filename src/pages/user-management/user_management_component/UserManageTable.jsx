@@ -5,7 +5,7 @@ import UserDeailsCard from "./UserDeailsCard";
 import {
   useBlockUserMutation,
   useGetAdminUsersQuery,
-} from "../../../RTK/services/dashboard/authorised-teams/admins/user/userApis";
+} from "../../../RTK/services/dashboard/safe-user/admins/user/userApis";
 import toast from "react-hot-toast";
 
 function UserManageTable() {

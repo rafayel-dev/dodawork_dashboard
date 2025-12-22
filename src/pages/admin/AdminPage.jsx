@@ -4,7 +4,7 @@ import { Button, Input, Modal, Table } from 'antd'
 import { adminTableColumn } from './admin-component/AdminTableColumn'
 import { FaPlus } from 'react-icons/fa'
 import AdminForm from './admin-component/AdminForm'
-import { useBlockUnblockAdminMutation, useDeleteAdminMutation, useGetAllAdminQuery } from '../../RTK/services/dashboard/authorised-teams/admins/adminApis'
+import { useBlockUnblockAdminMutation, useDeleteAdminMutation, useGetAllAdminQuery } from '../../RTK/services/dashboard/safe-user/admins/adminApis'
 import toast from 'react-hot-toast'
 function AdminPage() {
     const [searchTerm, setSearchTerm] = useState("")

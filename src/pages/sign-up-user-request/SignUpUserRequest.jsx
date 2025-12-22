@@ -7,7 +7,7 @@ import {
   useGetAllServiceProvidersQuery,
   useVerifyServiceProviderMutation,
   useApproveProviderUpdateMutation,
-} from "../../RTK/services/dashboard/authorised-teams/admins/serviceProvdiers/serviceProvdiersApi";
+} from "../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi";
 import Loading from "../../components/common/Loading";
 import { baseUrl } from "../../utils/optimizationFunction";
 import toast from "react-hot-toast";
