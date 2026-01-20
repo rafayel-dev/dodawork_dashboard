@@ -8,12 +8,13 @@ function CategoryForm({ open, hide, title, onFinish, record, loading, form }) {
 
     useEffect(() => {
         if (record) {
-            form.setFieldsValue({ name: record.name });
+            form.setFieldsValue({ name: record.name, price: record.price });
             if (record?.icon) {
                 setFileList([
                     {
                         uid: "-1",
                         name: record.name,
+                        price: record.price,
                         status: "done",
                         url: imageUrl(record.icon),
                     },
@@ -56,7 +57,14 @@ function CategoryForm({ open, hide, title, onFinish, record, loading, form }) {
                     label="Category Name"
                     rules={[{ required: true, message: "Please input category name!" }]}
                 >
-                    <Input />
+                    <Input placeholder="Category Name" />
+                </Form.Item>
+                <Form.Item
+                    name="price"
+                    label="Category Price"
+                    rules={[{ required: true, message: "Please input category Price!" }]}
+                >
+                    <Input placeholder="Category Price" />
                 </Form.Item>
 
                 <Form.Item>

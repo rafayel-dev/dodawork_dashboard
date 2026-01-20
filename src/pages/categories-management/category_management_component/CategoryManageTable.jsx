@@ -60,6 +60,7 @@ function CategoryManageTable() {
       try {
         const formData = new FormData();
         formData.append("name", values.name);
+        formData.append("price", values.price);
         if (values?.avatar?.fileList?.[0]?.originFileObj) {
           formData.append("icon", values.avatar.fileList[0].originFileObj);
         }

@@ -14,6 +14,11 @@ export const categoryManageColumns = (onEdit, onDelete, onNavigate) => [
     ),
   },
   {
+    title: "Category Price",
+    dataIndex: "price",
+    key: "price",
+  }, 
+  {
     title: "Sub Category",
     dataIndex: "subcategoryCount",
     key: "subcategoryCount",
