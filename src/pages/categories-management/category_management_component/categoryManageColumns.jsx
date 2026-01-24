@@ -17,6 +17,7 @@ export const categoryManageColumns = (onEdit, onDelete, onNavigate) => [
     title: "Category Price",
     dataIndex: "price",
     key: "price",
+    render: (text) => `$${text}`,
   }, 
   {
     title: "Sub Category",
