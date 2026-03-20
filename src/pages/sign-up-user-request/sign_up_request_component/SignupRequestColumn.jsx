@@ -15,7 +15,7 @@ export const signupRequestColumn = ({ onView, handleDelete, handleAccept, handle
       />
     ),
   },
-    {
+  {
     title: "Email",
     dataIndex: "email",
     key: "email",
@@ -25,7 +25,7 @@ export const signupRequestColumn = ({ onView, handleDelete, handleAccept, handle
     dataIndex: "company_name",
     key: "company_name",
   },
-    {
+  {
     title: "Website Link",
     dataIndex: "website_link",
     key: "website_link",
@@ -34,6 +34,24 @@ export const signupRequestColumn = ({ onView, handleDelete, handleAccept, handle
     title: "Category",
     dataIndex: "category",
     key: "category",
+  },
+  {
+    title: "Date/Time",
+    dataIndex: "updatedAt",
+    key: "updatedAt",
+    render: (text) => {
+      const date = new Date(text);
+      if (!text || isNaN(date.getTime())) return "N/A";
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'UTC'
+      }).replace(',', ' -');
+    },
   },
   {
     title: "Action",
@@ -100,7 +118,7 @@ export const signupRequestColumn = ({ onView, handleDelete, handleAccept, handle
               <Button
                 icon={<FaCheck />}
                 shape="circle"
-                style={{ backgroundColor: "#93c47d", color: "white" }} 
+                style={{ backgroundColor: "#93c47d", color: "white" }}
               />
             </Popconfirm>
           </Tooltip>

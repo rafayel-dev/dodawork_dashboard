@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiMail, FiGlobe, FiPhone } from "react-icons/fi";
-import { FaBuilding, FaUserTie, FaClock } from "react-icons/fa";
+import { FaBuilding, FaUserTie, FaClock, FaCalendar } from "react-icons/fa";
 import { Card, Divider, Collapse, Modal } from "antd";
 import { baseUrl } from "../../../utils/optimizationFunction";
 
@@ -31,7 +31,8 @@ function RequestedUser({ record }) {
     { title: "Contact Person", value: record.contact_person, icon: <FaUserTie /> },
     { title: "Working Hours", value: formatWorkingHours(record.working_hours), icon: <FaClock /> },
     { title: "Phone", value: record.phone, icon: <FiPhone /> },
-    { title: "Request Date", value: new Date(record.createdAt).toLocaleDateString() },
+    { title: "Request Date", value: new Date(record.updatedAt).toLocaleDateString(), icon: <FaCalendar /> },
+    // { title: "Request Time", value: new Date(record.updatedAt).toLocaleTimeString(), icon: <FaClock /> },
   ];
 
   return (

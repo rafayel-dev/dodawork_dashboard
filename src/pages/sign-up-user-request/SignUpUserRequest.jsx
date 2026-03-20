@@ -84,6 +84,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
           : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
       requestType: item.requestType,
       pendingUpdates: item.pendingUpdates,
+      updatedAt: item.updatedAt,
     })) || [];
   const [record, setRecord] = useState(null);
   const handleView = (record) => {
