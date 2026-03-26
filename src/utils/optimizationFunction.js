@@ -1,7 +1,7 @@
-// export const baseUrl = "http://3.96.86.190:3001";
-// export const imageBaseUrl = "http://3.96.86.190:3001";
-export const baseUrl = "http://10.10.20.52:6002";
-export const imageBaseUrl = "http://10.10.20.52:6002";
+export const baseUrl = "http://3.96.86.190:3001";
+export const imageBaseUrl = "http://3.96.86.190:3001";
+// export const baseUrl = "http://10.10.20.5:6002";
+// export const imageBaseUrl = "http://10.10.20.52:6002";
 
 export const imageUrl = (image) => {
   return image
