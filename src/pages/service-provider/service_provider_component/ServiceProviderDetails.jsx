@@ -6,7 +6,7 @@ import { FaAddressBook, FaBuilding, FaGlobe } from 'react-icons/fa'
 import { MdRoomService } from 'react-icons/md'
 import { useGetServiceProviderByIdQuery } from '../../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi'
 import Loading from '../../../components/common/Loading'
-import { baseUrl } from '../../../utils/optimizationFunction'
+import { imageUrl } from '../../../utils/optimizationFunction'
 import { PiIdentificationBadge } from 'react-icons/pi'
 
 
@@ -26,7 +26,6 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
   });
 
   const record = providerDetails?.data;
-  const BASE_URL = `${baseUrl}/`;
 
   const workingHoursDisplay = (
     <div>
@@ -59,7 +58,7 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
           <Card>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-24 h-20">
-                <img src={record?.profile_image ? `${BASE_URL}${record.profile_image.replace(/\\/g, "/")}` : "https://placehold.net/avatar.svg?text=EJ&bg=212121"} alt={record?.authId?.name} className="w-full h-full object-cover" />
+                <img src={record?.profile_image ? imageUrl(record.profile_image.replace(/\\/g, "/")) : "https://placehold.net/avatar.svg?text=EJ&bg=212121"} alt={record?.authId?.name} className="w-full h-full object-cover" />
               </div>
               <div className="w-full">
                 <h2 className="font-semibold text-lg">{record?.authId?.name}</h2>
@@ -81,10 +80,10 @@ function ServiceProviderDetails({ open = false, hide, providerId }) {
                 record.attachments.map((attachment, index) => (
                   <div key={index}>
                     <img
-                      src={`${BASE_URL}${attachment.replace(/\\/g, "/")}`}
+                      src={imageUrl(attachment.replace(/\\/g, "/"))}
                       alt={`${record?.authId?.name} attachment ${index + 1}`}
                       className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
-                      onClick={() => setPreview(`${BASE_URL}${attachment.replace(/\\/g, "/")}`)}
+                      onClick={() => setPreview(imageUrl(attachment.replace(/\\/g, "/")))}
                     />
                   </div>
                 ))

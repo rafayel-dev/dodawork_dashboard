@@ -4,10 +4,9 @@ import { matchedServicesColumns } from "./matchedServicesColumns";
 import MatchedServicesDetailsCard from "./MatchedServicesDetailsCard";
 import { useGetAllServiceRequestQuery } from "../../../RTK/services/dashboard/safe-user/admins/serviceRequest/serviceRequestApis";
 import Loading from "../../../components/common/Loading";
-import { baseUrl } from "../../../utils/optimizationFunction";
+import { imageUrl } from "../../../utils/optimizationFunction";
 
 function MatchedServicesTable() {
-  const BASE_URL = `${baseUrl}/`;
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [cancel, setCancel] = useState(false);
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -48,7 +47,7 @@ function MatchedServicesTable() {
       : false,
     service_image_or_video:
       Array.isArray(item.attachments) && item.attachments.length > 0
-        ? `${BASE_URL}${item.attachments[0].replace(/\\/g, "/")}`
+        ? imageUrl(item.attachments[0].replace(/\\/g, "/"))
         : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
   }));
 

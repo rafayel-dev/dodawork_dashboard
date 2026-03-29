@@ -4,7 +4,7 @@ import SearchInput from "../../../components/common/SearchInput";
 import { serviceProviderColumns } from "./serviceProviderColumns";
 import ServiceProviderDetails from "./ServiceProviderDetails";
 import Loading from "../../../components/common/Loading";
-import { baseUrl } from "../../../utils/optimizationFunction";
+import { imageUrl } from "../../../utils/optimizationFunction";
 import {
   useGetAllServiceProvidersQuery,
   useVerifyServiceProviderMutation,
@@ -39,7 +39,6 @@ function ServiceProviderTable() {
     setSelectedProviderId(null);
   }, []);
 
-  const BASE_URL = `${baseUrl}/`;
   const providers = useMemo(
     () =>
       serviceProvider?.data.providers?.filter((item) => item.isVerified === true && item.isRejected === false) || [],
@@ -70,11 +69,11 @@ function ServiceProviderTable() {
             .join("; ") || "N/A",
         contact_person: item.contactPerson || "N/A",
         avatar: item.profile_image
-          ? `${BASE_URL}${item.profile_image.replace(/\\/g, "/")}`
+          ? imageUrl(item.profile_image.replace(/\\/g, "/"))
           : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
         website_link: item.website || "N/A",
       })),
-    [providers, BASE_URL]
+    [providers]
   );
 
   const handleSearchChange = (e) => {

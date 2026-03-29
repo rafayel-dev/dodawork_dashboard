@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FiMail, FiGlobe, FiPhone } from "react-icons/fi";
 import { FaBuilding, FaUserTie, FaClock, FaCalendar } from "react-icons/fa";
 import { Card, Divider, Collapse, Modal } from "antd";
-import { baseUrl } from "../../../utils/optimizationFunction";
+import { imageUrl as getImageUrl } from "../../../utils/optimizationFunction";
 
 const { Panel } = Collapse;
 
@@ -72,7 +72,7 @@ function RequestedUser({ record }) {
             <div className="grid grid-cols-2 gap-4">
               {record.attachments?.length > 0 ? (
                 record.attachments.map((attachment, index) => {
-                  const imgUrl = `${baseUrl}${attachment.replace(/\\/g, "/")}`;
+                  const imgUrl = getImageUrl(attachment.replace(/\\/g, "/"));
                   return (
                     <img
                       key={index}
@@ -109,7 +109,7 @@ function RequestedUser({ record }) {
                         <p className="text-gray-600 font-medium mb-2">{formatKey(key)}:</p>
                         <div className="grid grid-cols-2 gap-4">
                           {value.map((attachment, index) => {
-                            const imgUrl = `${baseUrl}/${attachment.replace(/\\/g, "/")}`;
+                            const imgUrl = getImageUrl(attachment.replace(/\\/g, "/"));
                             return (
                               <img
                                 key={index}
@@ -128,9 +128,9 @@ function RequestedUser({ record }) {
                   // --- Handle other field types ---
                   let displayValue = value;
                   if (typeof value === 'string' && (key === 'profile_image' || key.toLowerCase().includes('image'))) {
-                    const imageUrl = `${baseUrl}/${value.replace(/\\/g, "/")}`;
+                    const imgUrlForLink = getImageUrl(value.replace(/\\/g, "/"));
                     displayValue = (
-                      <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#111111] font-semibold hover:text-[#F57C00] transition">
+                      <a href={imgUrlForLink} target="_blank" rel="noopener noreferrer" className="text-[#111111] font-semibold hover:text-[#F57C00] transition">
                         View Image
                       </a>
                     );
