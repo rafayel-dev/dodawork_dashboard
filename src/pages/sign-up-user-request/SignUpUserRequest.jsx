@@ -35,7 +35,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
         } else if (isVerifiedWithUpdates) {
           requestType = 'PENDING_UPDATE';
         }
-        
+
         return { ...item, requestType };
       })
       .filter(item => item.requestType === 'PENDING_NEW' || item.requestType === 'PENDING_UPDATE');
@@ -84,6 +84,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
           : "https://placehold.net/avatar.svg?text=EJ&bg=212121",
       requestType: item.requestType,
       pendingUpdates: item.pendingUpdates,
+      attachments: item.attachments,
       updatedAt: item.updatedAt,
     })) || [];
   const [record, setRecord] = useState(null);
@@ -115,7 +116,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
     const bodyData = {
       providerId: id,
     };
-    
+
     try {
       await approveProviderUpdate(bodyData).unwrap();
       toast.success("Updates approved successfully!");

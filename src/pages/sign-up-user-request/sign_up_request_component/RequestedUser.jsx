@@ -25,13 +25,13 @@ function RequestedUser({ record }) {
   if (!record) return null;
 
   const data = [
-    { title: "Email", value: record.email, icon: <FiMail /> },
-    { title: "Website", value: record.website_link, icon: <FiGlobe />, isLink: true },
-    { title: "Company", value: record.company_name, icon: <FaBuilding /> },
-    { title: "Contact Person", value: record.contact_person, icon: <FaUserTie /> },
-    { title: "Working Hours", value: formatWorkingHours(record.working_hours), icon: <FaClock /> },
-    { title: "Phone", value: record.phone, icon: <FiPhone /> },
-    { title: "Request Date", value: new Date(record.updatedAt).toLocaleDateString(), icon: <FaCalendar /> },
+    { title: "Email :", value: record.email, icon: <FiMail /> },
+    { title: "Website :", value: record.website_link, icon: <FiGlobe />, isLink: true },
+    { title: "Company :", value: record.company_name, icon: <FaBuilding /> },
+    { title: "Contact :", value: record.contact_person, icon: <FaUserTie /> },
+    { title: "Working Hours :", value: formatWorkingHours(record.working_hours), icon: <FaClock /> },
+    // { title: "Phone", value: record.phone, icon: <FiPhone /> },
+    { title: "Request Date :", value: new Date(record.updatedAt).toLocaleDateString(), icon: <FaCalendar /> },
     // { title: "Request Time", value: new Date(record.updatedAt).toLocaleTimeString(), icon: <FaClock /> },
   ];
 
