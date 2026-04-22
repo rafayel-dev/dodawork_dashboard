@@ -4,47 +4,78 @@ import { Modal, Table, Select } from "antd";
 import { signupRequestColumn } from "./sign_up_request_component/SignupRequestColumn";
 import RequestedUser from "./sign_up_request_component/RequestedUser";
 import {
-  useGetAllServiceProvidersQuery,
   useVerifyServiceProviderMutation,
   useApproveProviderUpdateMutation,
+  useGetSignupRequestsVerifyQuery,
+  useGetPendingProviderUpdatesQuery,
 } from "../../RTK/services/dashboard/safe-user/admins/serviceProvdiers/serviceProvdiersApi";
 import Loading from "../../components/common/Loading";
 import { baseUrl } from "../../utils/optimizationFunction";
 import toast from "react-hot-toast";
 
-function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
+function SignUpUserRequest({ title, pendingRequest, pagination: propPagination = true }) {
+  const [filterType, setFilterType] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [verifyProvider, { isLoading: isVerifyingOrApproving }] =
     useVerifyServiceProviderMutation();
   const [approveProviderUpdate, { isLoading: isApprovingUpdate }] =
     useApproveProviderUpdateMutation();
-  const { data: serviceProvider, isLoading, refetch } = useGetAllServiceProvidersQuery({ page: 1, limit: 10000 }, {
-    skip: !!pendingRequest
-  });
+
+  const {
+    data: signupRequests,
+    isLoading: isLoadingSignup,
+    refetch: refetchSignup
+  } = useGetSignupRequestsVerifyQuery(
+    { page: currentPage, limit: pageSize },
+    { skip: !!pendingRequest || (filterType !== 'ALL' && filterType !== 'PENDING_NEW') }
+  );
+
+  const {
+    data: updateRequests,
+    isLoading: isLoadingUpdate,
+    refetch: refetchUpdate
+  } = useGetPendingProviderUpdatesQuery(
+    { page: currentPage, limit: pageSize },
+    { skip: !!pendingRequest || (filterType !== 'ALL' && filterType !== 'PENDING_UPDATE') }
+  );
+
+  const refetch = useCallback(() => {
+    if (filterType === 'ALL' || filterType === 'PENDING_NEW') refetchSignup();
+    if (filterType === 'ALL' || filterType === 'PENDING_UPDATE') refetchUpdate();
+  }, [filterType, refetchSignup, refetchUpdate]);
 
   const providers = useMemo(() => {
-    const allProviders = pendingRequest || serviceProvider?.data?.providers || [];
-    return allProviders
-      .map(item => {
-        const isPendingNewRequest = item.isVerified === false && item.isRejected === false;
-        const hasPendingUpdates = item.pendingUpdates && typeof item.pendingUpdates === 'object' && Object.keys(item.pendingUpdates).length > 0;
-        const isVerifiedWithUpdates = item.isVerified === true && item.isRejected === false && hasPendingUpdates;
+    if (pendingRequest) return pendingRequest.map(item => ({ ...item, requestType: 'PENDING_NEW' }));
 
-        let requestType = 'NONE';
-        if (isPendingNewRequest) {
-          requestType = 'PENDING_NEW';
-        } else if (isVerifiedWithUpdates) {
-          requestType = 'PENDING_UPDATE';
-        }
+    const extractProviders = (res) => {
+      if (!res) return [];
+      if (res.data && Array.isArray(res.data.providers)) return res.data.providers;
+      if (Array.isArray(res.data)) return res.data;
+      if (Array.isArray(res.providers)) return res.providers;
+      return [];
+    };
 
-        return { ...item, requestType };
-      })
-      .filter(item => item.requestType === 'PENDING_NEW' || item.requestType === 'PENDING_UPDATE');
-  }, [serviceProvider, pendingRequest]);
+    const newRequests = extractProviders(signupRequests).map(item => ({ ...item, requestType: 'PENDING_NEW' }));
+    const updatedRequests = extractProviders(updateRequests).map(item => ({ ...item, requestType: 'PENDING_UPDATE' }));
+
+    if (filterType === 'PENDING_NEW') return newRequests;
+    if (filterType === 'PENDING_UPDATE') return updatedRequests;
+
+    return [...newRequests, ...updatedRequests];
+  }, [signupRequests, updateRequests, pendingRequest, filterType]);
+
+  const metaData = useMemo(() => {
+    if (filterType === 'PENDING_NEW') return signupRequests?.data?.meta;
+    if (filterType === 'PENDING_UPDATE') return updateRequests?.data?.meta;
+    return null;
+  }, [filterType, signupRequests, updateRequests]);
 
   const BASE_URL = `${baseUrl}/`;
 
-  const adminData =
-    providers?.map((item) => ({
+  const adminData = useMemo(() => {
+    return providers?.map((item) => ({
       _id: item._id || "N/A",
       key: item._id || Math.random().toString(),
       name: item.authId?.name || "Unknown",
@@ -87,28 +118,28 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
       attachments: item.attachments,
       updatedAt: item.updatedAt,
     })) || [];
+  }, [providers, BASE_URL]);
+
   const [record, setRecord] = useState(null);
+  const [open, setOpen] = useState(false);
+
   const handleView = (record) => {
-    console.log(record);
     setRecord(record);
     setOpen(true);
   };
+
   const handleDelete = async (id) => {
     let bodyData = {
       providerId: id,
       isVerified: "false",
       isRejected: "true",
     };
-    console.log(bodyData, "reg");
     try {
-      const response = await verifyProvider(bodyData).unwrap();
+      await verifyProvider(bodyData).unwrap();
       toast.success("Rejected successfully");
-      console.log("✅ Rejected successfully:", response);
       refetch();
     } catch (error) {
       toast.error("Rejected failed");
-
-      console.error("❌ Rejected failed:", error);
     }
   };
 
@@ -123,7 +154,6 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
       refetch();
     } catch (error) {
       toast.error("Failed to approve updates.");
-      console.error("❌ Approve updates failed:", error);
     }
   };
 
@@ -135,35 +165,37 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
       isRejected: "false",
     };
     try {
-      const response = await verifyProvider(bodyData).unwrap();
-
-      console.log("✅ Verified successfully:", response);
+      await verifyProvider(bodyData).unwrap();
       toast.success("Verified successfully");
       refetch();
     } catch (error) {
-      console.error("❌ Verification failed:", error);
       toast.error("Verification failed");
     }
   };
-  const [open, setOpen] = useState(false);
-  const [filterType, setFilterType] = useState('ALL');
+
   const hide = useCallback((value) => {
     setOpen(!value);
   }, []);
 
   const handleFilterChange = (value) => {
     setFilterType(value);
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
-  const filteredAdminData = useMemo(() => {
-    if (filterType === 'ALL' || pendingRequest) {
-      return adminData;
-    }
-    return adminData.filter(item => item.requestType === filterType);
-  }, [adminData, filterType, pendingRequest]);
+  const paginationConfig = propPagination ? {
+    current: metaData?.page || currentPage,
+    pageSize: metaData?.limit || pageSize,
+    total: metaData?.total || adminData.length,
+    onChange: (page, size) => {
+      setCurrentPage(page);
+      setPageSize(size);
+    },
+    showSizeChanger: true,
+    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+    pageSizeOptions: ['10', '20', '50', '100'],
+  } : false;
 
-
-  if (isLoading || isVerifyingOrApproving || isApprovingUpdate) {
+  if (isLoadingSignup || isLoadingUpdate || isVerifyingOrApproving || isApprovingUpdate) {
     return <Loading />;
   }
 
@@ -176,6 +208,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
             <h2 className="text-xl font-semibold">Providers Awaiting Approval</h2>
             <Select
               defaultValue="ALL"
+              value={filterType}
               style={{ width: 150 }}
               onChange={handleFilterChange}
               options={[
@@ -187,12 +220,12 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
           </div>
         )}
         <SignupRequestTable
-          adminData={filteredAdminData}
+          adminData={adminData}
           handleDelete={handleDelete}
           handleAccept={handleAccept}
           handleView={handleView}
           handleApproveUpdate={handleApproveUpdate}
-          pagination={pagination}
+          pagination={paginationConfig}
         />
       </PageContent>
       <Modal
@@ -208,6 +241,7 @@ function SignUpUserRequest({ title, pendingRequest, pagination = false }) {
     </PageLayout>
   );
 }
+
 
 export default SignUpUserRequest;
 
@@ -230,6 +264,8 @@ const SignupRequestTable = ({
       })}
       dataSource={adminData}
       pagination={pagination}
+      rowKey="_id"
     />
   );
 };
+

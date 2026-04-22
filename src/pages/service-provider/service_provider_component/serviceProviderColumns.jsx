@@ -18,7 +18,7 @@ export const serviceProviderColumns = (onView, onBlockToggle) => [
     dataIndex: "email",
     key: "email",
   },
-    {
+  {
     title: "Company Name",
     dataIndex: "company_name",
     key: "company_name",

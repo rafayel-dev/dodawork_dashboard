@@ -39,6 +39,38 @@ const serviceProvidersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["serviceProvider"],
     }),
+    getSignupRequestsVerify: builder.query({
+      query: (arg) => {
+        const { page, limit, search } = arg || {};
+        const params = new URLSearchParams();
+
+        if (page) params.append("page", page);
+        if (limit) params.append("limit", limit);
+        if (search) params.append("search", search);
+
+        return {
+          url: `/provider/pending-review?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["serviceProvider"],
+    }),
+    getPendingProviderUpdates: builder.query({
+      query: (arg) => {
+        const { page, limit, search } = arg || {};
+        const params = new URLSearchParams();
+
+        if (page) params.append("page", page);
+        if (limit) params.append("limit", limit);
+        if (search) params.append("search", search);
+
+        return {
+          url: `/provider/pending-updates?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["serviceProvider"],
+    }),
   }),
 });
 
@@ -47,6 +79,8 @@ export const {
   useGetServiceProviderByIdQuery,
   useVerifyServiceProviderMutation,
   useApproveProviderUpdateMutation,
+  useGetSignupRequestsVerifyQuery,
+  useGetPendingProviderUpdatesQuery,
 } = serviceProvidersApi;
 
 
